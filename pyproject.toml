@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "jev-ci"
+version = "0.1.0"
+description = "Bounded, traceable policy evaluation for Git changes with TypeSafe Jev"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = [
+  "httpx>=0.28,<0.29",
+  "python-dotenv>=1.0,<2",
+  "ruamel.yaml>=0.18,<0.19",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.3,<9", "ruff>=0.13,<0.14", "PyYAML>=6.0.2,<7"]
+
+[project.scripts]
+jev-ci = "jev_ci.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/jev_ci"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

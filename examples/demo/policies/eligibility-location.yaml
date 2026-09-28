@@ -1,0 +1,43 @@
+schema_version: jev.policy/0.2
+id: eligibility-location
+version: 0.1.0-illustrative
+statement: Eligibility decisions belong in EligibilityPolicy.
+question: Does this change introduce an eligibility decision outside EligibilityPolicy?
+scope:
+  include: ["src/**"]
+  exclude: []
+  change_kind: introduced_or_worsened
+interpretation:
+  definitions:
+    - Eligibility means a business choice about whether an operation is allowed.
+  exceptions:
+    - Transport syntax validation is permitted outside EligibilityPolicy.
+  ambiguity:
+    - The documented owner is absent or contradictory.
+outcomes: [compliant, violation, uncertain]
+documents: [architecture]
+aggregation:
+  mode: requires_reconciliation
+discovery:
+  search_terms: [eligibility, eligible]
+evidence:
+  allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES]
+  max_rounds: 3
+  max_requests_per_round: 3
+  max_input_tokens: 20000
+  max_evidence_bytes: 80000
+confidence:
+  metric: selected_probability
+  compliant_min: null
+  violation_min: null
+  request_selection_min: null
+  support_min: null
+  calibration_id: null
+feedback:
+  violation: Review the cited change for an eligibility decision outside its documented owner.
+  repair_guidance: Move or delegate the decision to EligibilityPolicy while preserving behavior and tests.
+ci:
+  severity: warning
+  compliant: report
+  violation: warn
+  uncertain: report

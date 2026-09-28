@@ -1,0 +1,18 @@
+# Dependency versions exercised by the repository CI. Update with tests and review.
+anyio==4.15.1
+certifi==2026.7.22
+h11==0.16.0
+httpcore==1.0.9
+httpx==0.28.1
+idna==3.20
+iniconfig==2.3.0
+packaging==26.3
+pluggy==1.6.0
+Pygments==2.21.0
+pytest==8.4.2
+python-dotenv==1.2.3
+PyYAML==6.0.3
+ruff==0.13.3
+ruamel.yaml==0.18.17
+ruamel.yaml.clib==0.2.15
+typing_extensions==4.16.0

@@ -1,0 +1,59 @@
+# Copy into an application repository and replace the pinned tool SHA.
+# Keep .jev-ci/config.json, policy YAML, and bound documents on the protected branch.
+name: Jev CI
+on:
+  pull_request:
+
+jobs:
+  jev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout application history
+        uses: actions/checkout@v4
+        with:
+          path: application
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Fetch pull request head
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          git -C application fetch --no-tags origin "+refs/pull/${PR_NUMBER}/head:refs/remotes/origin/jev-pr-head"
+          test "$(git -C application rev-parse refs/remotes/origin/jev-pr-head)" = "$SOURCE_SHA"
+      - name: Checkout protected controls
+        uses: actions/checkout@v4
+        with:
+          path: control
+          ref: ${{ github.event.pull_request.base.sha }}
+          persist-credentials: false
+      - name: Checkout pinned Jev CI tool
+        uses: actions/checkout@v4
+        with:
+          repository: krisitown/jev-quality-gate
+          ref: PINNED_TOOL_COMMIT_SHA
+          path: tool
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install tool
+        run: python -m pip install -e ./tool -c tool/constraints.txt
+      - name: Evaluate branch
+        env:
+          SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+          TARGET_SHA: ${{ github.event.pull_request.base.sha }}
+          AI_GATEWAY_API_KEY: ${{ secrets.AI_GATEWAY_API_KEY }}
+        run: |
+          jev-ci validate --config control/.jev-ci/config.json --policies control/.jev-ci/policies
+          jev-ci evaluate --repo application --source "$SOURCE_SHA" --target "$TARGET_SHA" --config control/.jev-ci/config.json --policies control/.jev-ci/policies --output jev-pack
+      - name: Retain Evidence Pack
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jev-pack
+          path: jev-pack/
+          if-no-files-found: warn

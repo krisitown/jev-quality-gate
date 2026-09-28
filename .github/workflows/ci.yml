@@ -1,0 +1,30 @@
+name: CI
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12', '3.13']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pinned development dependencies
+        run: python -m pip install -e '.[test]' -c constraints.txt
+      - name: Install pinned Ripwire fixture binary
+        run: |
+          curl -fsSL -o /tmp/ripwire-0.6.5-linux-x64.tar.gz https://github.com/redhat-et/ripwire/releases/download/v0.6.5/ripwire-0.6.5-linux-x64.tar.gz
+          echo '5c5794612f5f06632ada7c27a0f5c8f400748a70f707b64ec4d238c4fba2f7ea  /tmp/ripwire-0.6.5-linux-x64.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/ripwire-0.6.5-linux-x64.tar.gz -C /tmp
+      - name: Lint and test
+        env:
+          JEV_CI_RIPWIRE_BIN: /tmp/ripwire-0.6.5-linux-x64/ripwire
+        run: |
+          ruff check src tests
+          ruff format --check src tests
+          pytest -q
