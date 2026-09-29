@@ -1,0 +1,44 @@
+schema_version: jev.policy/0.2
+id: routing-api-compatibility
+version: 0.1.0-review
+statement: HTTP method additions preserve established router interfaces and route behavior.
+question: Does this change make an existing router implementation incompatible or change the routes registered by existing routing helpers without an explicit caller choice?
+scope:
+  include: ["routergroup.go", "ginS/**", "*_test.go"]
+  exclude: []
+  change_kind: introduced_or_worsened
+interpretation:
+  definitions:
+    - The bound convention document defines additive routing and compatibility expectations.
+    - An existing helper changes its route set when the same call registers a different set of methods after the change.
+  exceptions:
+    - A new method can use a new method-specific helper or an opt-in interface that does not require existing external implementations to add methods.
+  ambiguity:
+    - The changed helper's previous method set or interface compatibility cannot be established from trusted evidence.
+outcomes: [compliant, violation, uncertain]
+documents: [convention]
+aggregation:
+  mode: requires_reconciliation
+discovery:
+  search_terms: ["IRoutes", "Any", "Handle", "QUERY", "MethodQuery"]
+evidence:
+  allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES, GET_IMPLEMENTATIONS, GET_TESTS]
+  max_rounds: 3
+  max_requests_per_round: 3
+  max_input_tokens: 50000
+  max_evidence_bytes: 100000
+confidence:
+  metric: selected_probability
+  compliant_min: null
+  violation_min: null
+  request_selection_min: null
+  support_min: null
+  calibration_id: null
+feedback:
+  violation: Review the changed routing API for a breaking interface requirement or an implicit change to existing route registration.
+  repair_guidance: Preserve existing interface implementers and route sets; add new method behavior through an additive, explicit surface.
+ci:
+  severity: warning
+  compliant: report
+  violation: report
+  uncertain: report

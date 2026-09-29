@@ -34,12 +34,12 @@ Provider/model output exceeding a hard transport cap is terminated and recorded 
 
 ## Replay modes
 
-1. **Protocol replay:** reuse recorded model/provider responses and exact payloads, rerun schema/state/budget/CI mapping, and verify hashes. No inference, retrieval, or network. Identical protocol versions should produce identical logical results; wall-clock times are historical inputs.
+1. **Protocol replay (implemented verification scope):** verify checksums and blob identities, native typed answers, ordered request/attempt/response/result linkage, saved unit diagnostics, deterministic policy aggregation, and CI mapping. No inference, retrieval, or network. This verifier does not yet re-execute every controller transition or independently reconstruct candidate menus/budgets from source. It reports `integrity_linkage_and_deterministic_aggregation`; full state-machine replay remains a separate validation gap.
 2. **Retrieval verification:** rerun a pinned provider on the same snapshots/config and compare raw/normalized evidence. Separate nondeterminism, cache effects, and version changes from policy outcomes.
 3. **Fresh evaluation:** rerun inference over the recorded initial state or recorded evidence sequence. Assign a new run ID and parent reference. This is a new observation, not deterministic replay.
 
 ## Durability and integrity
 
-Write and flush each transition before its side effect where possible, and record completion afterward; an interrupted call remains explicitly incomplete. Write result/summary files atomically. Final checksums cover manifest, events, results, and blobs, excluding the checksum file itself. A clean finish event and matching checksums distinguish a sealed pack from an incomplete run. Hashes detect changes relative to a retained manifest; they do not prove authenticity if the whole archive is replaced. Use immutable artifact retention for formal runs.
+Write and flush each transition before its side effect where possible, and record completion afterward; an interrupted call remains explicitly incomplete. Write result/summary files and the human-readable `report.md` atomically. Final checksums cover manifest, events, results, and blobs, excluding the checksum file itself. A clean finish event and matching checksums distinguish a sealed pack from an incomplete run. Hashes detect changes relative to a retained manifest; they do not prove authenticity if the whole archive is replaced. Use immutable artifact retention for formal runs.
 
 If trace persistence fails, stop and return the operational-error exit status. CI must never report successful evaluation without a durable result/trace. Keep partial artifacts and an emergency stderr diagnostic; do not manufacture an empty success pack. Research exports include failures and abstentions alongside successful decisions.

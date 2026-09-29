@@ -25,6 +25,11 @@ jobs:
         env:
           JEV_CI_RIPWIRE_BIN: /tmp/ripwire-0.6.5-linux-x64/ripwire
         run: |
-          ruff check src tests
-          ruff format --check src tests
+          ruff check src tests validation
+          ruff format --check src tests validation
           pytest -q
+      - name: Verify built package entry point
+        run: |
+          python -m pip wheel . --no-deps -c constraints.txt --wheel-dir /tmp/jev-wheel
+          python -m pip install --force-reinstall --no-deps /tmp/jev-wheel/jev_ci-*.whl
+          jev-ci validate --config examples/demo/config.json

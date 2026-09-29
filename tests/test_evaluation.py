@@ -88,6 +88,9 @@ def test_branch_evaluation_adapts_reconciles_and_replays(
     assert requests[0]["state"]["unit_kind"] == "chunk"
     assert requests[-1]["state"]["unit_kind"] == "reconciliation"
     assert verify_pack(output)["validated_responses"] == 3
+    assert result["diagnostics"][0]["outcome"] == "violation"
+    assert "Source:" in (output / "report.md").read_text()
+    assert "report.md" in json.loads((output / "checksums.json").read_text())["files"]
     assert "mock-secret-value" not in (output / "events.jsonl").read_text()
     assert "mock-secret-value" not in (output / "manifest.json").read_text()
 

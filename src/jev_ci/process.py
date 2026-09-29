@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import selectors
 import subprocess
+import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -26,16 +27,34 @@ def run_bounded(
     max_output_bytes: int,
     timeout_seconds: float,
     max_stderr_bytes: int = 4096,
+    input_bytes: bytes | None = None,
 ) -> ProcessResult:
-    process = subprocess.Popen(
-        args, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    deadline = time.monotonic() + timeout_seconds
+    input_stream = None
+    if input_bytes is not None:
+        input_stream = tempfile.TemporaryFile()
+        input_stream.write(input_bytes)
+        input_stream.seek(0)
+    try:
+        if deadline <= time.monotonic():
+            raise TimeoutError("subprocess deadline expired")
+        process = subprocess.Popen(
+            args,
+            cwd=cwd,
+            env=env,
+            stdin=input_stream,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+        )
+    except BaseException:
+        if input_stream:
+            input_stream.close()
+        raise
     try:
         assert process.stdout is not None and process.stderr is not None
         stdout = bytearray()
         stderr = bytearray()
         exceeded = False
-        deadline = time.monotonic() + timeout_seconds
         with selectors.DefaultSelector() as selector:
             selector.register(process.stdout, selectors.EVENT_READ, "stdout")
             selector.register(process.stderr, selectors.EVENT_READ, "stderr")
@@ -70,3 +89,5 @@ def run_bounded(
             process.stdout.close()
         if process.stderr:
             process.stderr.close()
+        if input_stream:
+            input_stream.close()

@@ -35,8 +35,12 @@ def digest(data: bytes) -> str:
 
 
 def atomic_json(path: Path, value: Any) -> None:
+    atomic_bytes(path, canonical(value) + b"\n")
+
+
+def atomic_bytes(path: Path, data: bytes) -> None:
+    """Replace a file only after its complete contents have been flushed."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    data = canonical(value) + b"\n"
     fd, temporary = tempfile.mkstemp(prefix=".tmp-", dir=path.parent)
     try:
         with os.fdopen(fd, "wb") as stream:

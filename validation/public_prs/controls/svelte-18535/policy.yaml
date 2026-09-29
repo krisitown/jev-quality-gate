@@ -1,0 +1,44 @@
+schema_version: jev.policy/0.2
+id: reactive-state-observer-consistency
+version: 0.1.0-review
+statement: Reactive state observers track actual mutations of the state tree that owns them.
+question: Does this change cause observers to miss a completed mutation, report an unchanged value, or receive a notification from a nested value after it has been detached from their state tree?
+scope:
+  include: ["packages/svelte/src/internal/client/**", "packages/svelte/src/compiler/phases/**", "packages/svelte/tests/runtime-runes/samples/state-onchange-*/**", "packages/svelte/tests/runtime-runes/samples/state-raw-onchange/**"]
+  exclude: ["**/*.ipynb", "**/.ipynb_checkpoints/**", ".devcontainer/**", "Untitled*", "untitled.md"]
+  change_kind: introduced_or_worsened
+interpretation:
+  definitions:
+    - The bound convention document defines observer timing, no-op behavior, nested ownership, and array behavior.
+    - A detached nested value no longer belongs to the former parent's reachable state tree after replacement or deletion.
+  exceptions:
+    - An observer may run once for a completed batch that contains one or more real mutations.
+  ambiguity:
+    - Available source evidence does not establish whether the state is still owned by the observed tree or when a batched mutation is considered complete.
+outcomes: [compliant, violation, uncertain]
+documents: [convention]
+aggregation:
+  mode: requires_reconciliation
+discovery:
+  search_terms: ["onchange", "PROXY_ONCHANGE_SYMBOL", "proxy_state", "batching", "UNINITIALIZED"]
+evidence:
+  allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES, GET_TESTS, GET_DEPENDENCY_NEIGHBORHOOD]
+  max_rounds: 3
+  max_requests_per_round: 3
+  max_input_tokens: 50000
+  max_evidence_bytes: 100000
+confidence:
+  metric: selected_probability
+  compliant_min: null
+  violation_min: null
+  request_selection_min: null
+  support_min: null
+  calibration_id: null
+feedback:
+  violation: Review the changed mutation path for an observer notification that is missing, premature, spurious, or attached to a former owner.
+  repair_guidance: Trace mutation, ownership changes, batching, and notification timing together; retain native array behavior and notify only for completed state changes.
+ci:
+  severity: warning
+  compliant: report
+  violation: report
+  uncertain: report

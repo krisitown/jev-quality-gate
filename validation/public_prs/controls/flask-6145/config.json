@@ -1,0 +1,55 @@
+{
+  "schema_version": "jev.config/0.2",
+  "mode": "calibration",
+  "control_bundle": {
+    "id": "flask-6145",
+    "root": ".",
+    "revision": "1"
+  },
+  "document_bindings": [
+    {
+      "id": "convention",
+      "path": "convention.md",
+      "sha256": "a37fd0cab8af0729868255ba3e1283be1b21e434be44ebc0ad13457738f5c17b",
+      "authority": "trusted"
+    }
+  ],
+  "inference": {
+    "adapter": "vercel-typesafe",
+    "model": "typesafe-ai/jev",
+    "endpoint": "https://ai-gateway.vercel.sh/typesafe/v1/systemone",
+    "credential_env": "AI_GATEWAY_API_KEY",
+    "timeout_seconds": 60,
+    "max_request_bytes": 250000,
+    "max_response_bytes": 100000,
+    "max_questions": 8
+  },
+  "providers": {
+    "enabled": [
+      "git-exact"
+    ]
+  },
+  "diff": {
+    "strategy": "bounded-sequential-v1",
+    "max_chunk_bytes": 12000,
+    "max_total_diff_bytes": 8388608,
+    "max_chunks": 1024
+  },
+  "limits": {
+    "max_policies": 8,
+    "max_policy_bytes": 65536,
+    "max_policy_folder_bytes": 2097152,
+    "max_calls": 80,
+    "max_seconds": 600,
+    "max_rounds": 3,
+    "max_candidates": 32,
+    "max_evidence_bytes": 100000,
+    "max_search_results": 20,
+    "max_input_bytes": 200000
+  },
+  "ci": {
+    "incomplete": "report",
+    "operational_error": "error"
+  },
+  "policy_dir": "."
+}

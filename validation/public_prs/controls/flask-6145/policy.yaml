@@ -1,0 +1,44 @@
+schema_version: jev.policy/0.2
+id: serialization-fallback-boundary
+version: 0.1.0-review
+statement: The JSON provider converts intentionally supported values and preserves explicit failure for unsupported values.
+question: Does this change introduce a path where an unsupported value is silently accepted, or a supported conversion can return a value the JSON encoder cannot safely encode?
+scope:
+  include: ["src/flask/json/**", "tests/test_json.py"]
+  exclude: []
+  change_kind: introduced_or_worsened
+interpretation:
+  definitions:
+    - The bound convention document defines the serialization boundary and unsupported-value behavior.
+    - A conversion is supported when the provider handles the type intentionally and the resulting value is encodable by its JSON backend.
+  exceptions:
+    - Intentional representations for established special types are allowed when their result is JSON-safe.
+  ambiguity:
+    - The provider's documented representations or error behavior do not establish whether a conversion is intentional.
+outcomes: [compliant, violation, uncertain]
+documents: [convention]
+aggregation:
+  mode: requires_reconciliation
+discovery:
+  search_terms: ["JSONProvider", "_default", "TypeError", "dataclass", "PathLike"]
+evidence:
+  allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES, GET_TESTS]
+  max_rounds: 3
+  max_requests_per_round: 3
+  max_input_tokens: 50000
+  max_evidence_bytes: 100000
+confidence:
+  metric: selected_probability
+  compliant_min: null
+  violation_min: null
+  request_selection_min: null
+  support_min: null
+  calibration_id: null
+feedback:
+  violation: Review the changed serialization path for implicit acceptance or a conversion that is not JSON-safe.
+  repair_guidance: Keep supported representations explicit and encodable; preserve the provider's explicit error for unsupported values.
+ci:
+  severity: warning
+  compliant: report
+  violation: report
+  uncertain: report

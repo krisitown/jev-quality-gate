@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .coordinator import evaluate, validate
 from .errors import JevCIError
+from .reporting import render_text
 from .trace import inspect_pack, verify_pack
 
 
@@ -76,14 +77,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.format == "json":
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
     else:
-        if code == 2:
-            print(
-                "jev-ci: " + "; ".join(result.get("errors", ["execution error"])),
-                file=sys.stderr,
-            )
-        else:
-            suffix = f"; pack={result['output']}" if "output" in result else ""
-            print(f"jev-ci: {result['status']}{suffix}")
+        print(render_text(result), file=sys.stderr if code == 2 else sys.stdout)
     return code
 
 

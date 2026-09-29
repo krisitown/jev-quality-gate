@@ -1,0 +1,75 @@
+{
+  "schema_version": "jev.public-pr-validation/1",
+  "cases": [
+    {
+      "id": "flask-6145",
+      "repository": "pallets/flask",
+      "repository_url": "https://github.com/pallets/flask",
+      "pull_request": 6145,
+      "pull_request_url": "https://github.com/pallets/flask/pull/6145",
+      "head_commit": "56f3db172de7f3e843a3ebf048f6f475ef700b40",
+      "base_commit": "d318b683471101618febed18996405ad26462110",
+      "expected_merge_base": "d318b683471101618febed18996405ad26462110",
+      "language": "Python",
+      "license_family": "BSD-3-Clause",
+      "license_file": "LICENSE.txt",
+      "size": {
+        "changed_files": 2,
+        "changed_lines": 25,
+        "scoped_source_test_changed_lines": 25
+      },
+      "controls_sha256": {
+        "config.json": "75d6527cc946f95033712cc444860389843072c47518ad02706d00dd5bc7f846",
+        "policy.yaml": "8c45ad882f0a062fd1d3dccdd0b535d2068e034835518852ff3c38d8fd93e886",
+        "convention.md": "a37fd0cab8af0729868255ba3e1283be1b21e434be44ebc0ad13457738f5c17b"
+      }
+    },
+    {
+      "id": "gin-4806",
+      "repository": "gin-gonic/gin",
+      "repository_url": "https://github.com/gin-gonic/gin",
+      "pull_request": 4806,
+      "pull_request_url": "https://github.com/gin-gonic/gin/pull/4806",
+      "head_commit": "a27703b027a81de65d387bcb59d8cc6d904c7f03",
+      "base_commit": "05b14df992a31fe8ff567338bb6c934f1aa3872f",
+      "expected_merge_base": "05b14df992a31fe8ff567338bb6c934f1aa3872f",
+      "language": "Go",
+      "license_family": "MIT",
+      "license_file": "LICENSE",
+      "size": {
+        "changed_files": 6,
+        "changed_lines": 156,
+        "scoped_source_test_changed_lines": 156
+      },
+      "controls_sha256": {
+        "config.json": "93656d288249351bc433ee732ea97af99a96cad1afb50a662ad77c6584c4bfe1",
+        "policy.yaml": "a6f69a13cb7f612bbcaa372452f8a3e64c81c71154446c6011a2a641c430272d",
+        "convention.md": "f4afc7ce70309feb0a3e9831fdc3a517d4994eff01470ff870a9955f9c4bda87"
+      }
+    },
+    {
+      "id": "svelte-18535",
+      "repository": "sveltejs/svelte",
+      "repository_url": "https://github.com/sveltejs/svelte",
+      "pull_request": 18535,
+      "pull_request_url": "https://github.com/sveltejs/svelte/pull/18535",
+      "head_commit": "8d100d15c77b1a001700e29032761668cfbea461",
+      "base_commit": "b4d1583ae20f3869a88a731d9a265c546c099f66",
+      "expected_merge_base": "3d6da41b1d3aaf80b5e9cb9aa8aaa1f91ffc485b",
+      "language": "JavaScript/TypeScript (Svelte)",
+      "license_family": "MIT",
+      "license_file": "LICENSE.md",
+      "size": {
+        "changed_files": 46,
+        "changed_lines": 2269,
+        "scoped_source_test_changed_lines": 705,
+        "broader_source_test_changed_lines": 741
+      },
+      "controls_sha256": {
+        "config.json": "2c3121e4b0f1d6211f4461e07615311c9c70acccfd9d54f2de98856f9169755d",
+        "policy.yaml": "121a0262abc182cd02c81014b171cb7eec0a4be2518f655c873f0bd738ffdb19",
+        "convention.md": "a51c8b3232fc9764b1072f1acf8859908f6a662f4d79ef0653917a1ad022ad67"
+      }
+    }
+  ]
+}

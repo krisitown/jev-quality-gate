@@ -3,8 +3,10 @@
 from __future__ import annotations
 
 import os
+import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Callable, Iterator
 
 from .errors import ComparisonError
 from .process import run_bounded
@@ -46,7 +48,12 @@ class Comparison:
         }
 
 
-def _git(repo: Path, *args: str, max_bytes: int = 8 * 1024 * 1024) -> bytes:
+def _git(
+    repo: Path,
+    *args: str,
+    max_bytes: int = 8 * 1024 * 1024,
+    deadline: float | None = None,
+) -> bytes:
     env = os.environ.copy()
     env.update(
         {
@@ -71,10 +78,13 @@ def _git(repo: Path, *args: str, max_bytes: int = 8 * 1024 * 1024) -> bytes:
         *args,
     ]
     try:
+        timeout = 30.0 if deadline is None else min(30.0, deadline - time.monotonic())
+        if timeout <= 0:
+            raise TimeoutError("Git deadline expired")
         process = run_bounded(
             command,
             env=env,
-            timeout_seconds=30,
+            timeout_seconds=timeout,
             max_output_bytes=max_bytes,
         )
     except (OSError, TimeoutError) as exc:
@@ -87,30 +97,232 @@ def _git(repo: Path, *args: str, max_bytes: int = 8 * 1024 * 1024) -> bytes:
     return process.stdout
 
 
-def resolve_commit(repo: Path, ref: str) -> str:
+def iter_tree_blobs(
+    repo: Path,
+    commit: str,
+    *,
+    max_file_bytes: int,
+    max_total_bytes: int,
+    paths: set[str] | None = None,
+    path_filter: Callable[[str], bool] | None = None,
+    deadline: float | None = None,
+    stats: dict | None = None,
+) -> Iterator[tuple[str, str, bytes]]:
+    """Read regular committed blobs with a bounded number of Git processes.
+
+    The tree inventory and `cat-file --batch-check` determine which blobs fit
+    before content is requested. The content batch is therefore bounded by
+    `max_total_bytes`; oversized, unsupported and over-budget files are counted
+    in `stats` and omitted. A deadline bounds each Git operation.
+    """
+    report = stats if stats is not None else {}
+    report.update(
+        partial=False,
+        skipped_files=0,
+        skipped_paths=[],
+        bytes_read=0,
+        limit_reason=None,
+    )
+
+    def remaining() -> float:
+        if deadline is None:
+            return 60.0
+        value = deadline - time.monotonic()
+        if value <= 0:
+            raise TimeoutError("Git blob scan deadline expired")
+        return value
+
+    repo = repo.resolve()
+    env = os.environ.copy()
+    env.update(
+        {
+            "GIT_CONFIG_NOSYSTEM": "1",
+            "GIT_OPTIONAL_LOCKS": "0",
+            "GIT_EXTERNAL_DIFF": "",
+            "GIT_PAGER": "cat",
+        }
+    )
+    prefix = [
+        "git",
+        "-C",
+        str(repo),
+        "-c",
+        "core.fsmonitor=false",
+        "-c",
+        "core.hooksPath=/dev/null",
+    ]
+
+    def run_git(args: list[str], input_bytes: bytes, cap: int) -> bytes:
+        try:
+            process = run_bounded(
+                args,
+                env=env,
+                input_bytes=input_bytes,
+                timeout_seconds=remaining(),
+                max_output_bytes=cap,
+            )
+        except TimeoutError as exc:
+            raise TimeoutError("Git blob scan deadline expired") from exc
+        except OSError as exc:
+            raise ComparisonError(
+                f"Git blob scan failed: {type(exc).__name__}"
+            ) from exc
+        if process.output_exceeded:
+            raise ComparisonError("Git blob scan output exceeds byte cap")
+        if process.returncode:
+            raise ComparisonError(
+                "Git blob scan failed: "
+                + process.stderr.decode("utf-8", "replace").strip()
+            )
+        return process.stdout
+
+    try:
+        inventory = _git(
+            repo,
+            "ls-tree",
+            "-r",
+            "-z",
+            commit,
+            max_bytes=16 * 1024 * 1024,
+            deadline=deadline,
+        )
+    except ComparisonError as exc:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeoutError("Git blob scan deadline expired") from exc
+        raise
+    eligible: list[tuple[str, str]] = []
+    for record in inventory.split(b"\0"):
+        remaining()
+        if not record:
+            continue
+        try:
+            metadata, raw_path = record.split(b"\t", 1)
+            mode, kind, oid = metadata.decode("ascii").split()
+            path = raw_path.decode("utf-8")
+        except (ValueError, UnicodeError) as exc:
+            raise ComparisonError(
+                "Git tree contains malformed or undecodable entry"
+            ) from exc
+        if not path or path.startswith("/") or ".." in Path(path).parts or "\\" in path:
+            raise ComparisonError("Git tree contains unsafe path")
+        if paths is not None and path not in paths:
+            continue
+        if path_filter is not None and not path_filter(path):
+            continue
+        if mode not in ("100644", "100755") or kind != "blob":
+            report["partial"] = True
+            report["skipped_files"] += 1
+            report["skipped_paths"].append(path)
+            continue
+        eligible.append((path, oid))
+
+    if not eligible:
+        return
+    check_input = b"".join(oid.encode("ascii") + b"\n" for _, oid in eligible)
+    checked = run_git(
+        prefix
+        + ["cat-file", "--batch-check=%(objectname) %(objecttype) %(objectsize)"],
+        check_input,
+        32 * 1024 * 1024,
+    )
+    check_rows = checked.splitlines()
+    if len(check_rows) != len(eligible):
+        raise ComparisonError("Git returned an incomplete blob size inventory")
+    selected: list[tuple[str, str, int]] = []
+    total = 0
+    for (path, expected_oid), row in zip(eligible, check_rows):
+        remaining()
+        try:
+            oid, kind, size_text = row.decode("ascii").split()
+            size = int(size_text)
+        except (ValueError, UnicodeError) as exc:
+            raise ComparisonError("Git returned malformed blob size metadata") from exc
+        if oid != expected_oid or kind != "blob" or size < 0:
+            raise ComparisonError("Git blob identity changed during scan")
+        if size > max_file_bytes or total + size > max_total_bytes:
+            report["partial"] = True
+            report["skipped_files"] += 1
+            report["skipped_paths"].append(path)
+            report["limit_reason"] = "search_byte_limit"
+            continue
+        selected.append((path, oid, size))
+        total += size
+    if not selected:
+        return
+    batch_input = b"".join(oid.encode("ascii") + b"\n" for _, oid, _ in selected)
+    batch = run_git(
+        prefix + ["cat-file", "--batch"],
+        batch_input,
+        max_total_bytes + len(selected) * 128,
+    )
+    offset = 0
+    for path, oid, size in selected:
+        remaining()
+        try:
+            newline = batch.index(b"\n", offset)
+            header = batch[offset:newline].decode("ascii").split()
+            if (
+                len(header) != 3
+                or header[0] != oid
+                or header[1] != "blob"
+                or int(header[2]) != size
+            ):
+                raise ValueError("mismatched batch header")
+            start, end = newline + 1, newline + 1 + size
+            if end >= len(batch) or batch[end : end + 1] != b"\n":
+                raise ValueError("truncated batch content")
+            content = batch[start:end]
+        except (ValueError, UnicodeError) as exc:
+            raise ComparisonError("Git returned malformed batch blob data") from exc
+        report["bytes_read"] += size
+        offset = end + 1
+        yield path, oid, content
+    if offset != len(batch):
+        raise ComparisonError("Git returned trailing batch blob data")
+
+
+def resolve_commit(repo: Path, ref: str, *, deadline: float | None = None) -> str:
     if not ref or ref.startswith("-"):
         raise ComparisonError("invalid Git ref")
-    return _git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}").decode().strip()
+    return (
+        _git(repo, "rev-parse", "--verify", f"{ref}^{{commit}}", deadline=deadline)
+        .decode()
+        .strip()
+    )
 
 
 def compare(
-    repo: Path, source_ref: str, target_ref: str, max_diff_bytes: int
+    repo: Path,
+    source_ref: str,
+    target_ref: str,
+    max_diff_bytes: int,
+    *,
+    deadline: float | None = None,
 ) -> Comparison:
     repo = repo.resolve()
     if not repo.is_dir():
         raise ComparisonError("repository directory does not exist")
-    if _git(repo, "rev-parse", "--show-toplevel").decode().strip() != str(repo):
+    if _git(
+        repo, "rev-parse", "--show-toplevel", deadline=deadline
+    ).decode().strip() != str(repo):
         raise ComparisonError("--repo must name the Git repository root")
-    source, target = resolve_commit(repo, source_ref), resolve_commit(repo, target_ref)
-    bases = _git(repo, "merge-base", "--all", target, source).decode().splitlines()
+    source = resolve_commit(repo, source_ref, deadline=deadline)
+    target = resolve_commit(repo, target_ref, deadline=deadline)
+    bases = (
+        _git(repo, "merge-base", "--all", target, source, deadline=deadline)
+        .decode()
+        .splitlines()
+    )
     if len(bases) != 1:
         raise ComparisonError(f"expected one merge base, found {len(bases)}")
     base = bases[0]
     trees = [
-        _git(repo, "rev-parse", f"{commit}^{{tree}}").decode().strip()
+        _git(repo, "rev-parse", f"{commit}^{{tree}}", deadline=deadline)
+        .decode()
+        .strip()
         for commit in (source, target, base)
     ]
-    dirty = bool(_git(repo, "status", "--porcelain=v1", "-z"))
+    dirty = bool(_git(repo, "status", "--porcelain=v1", "-z", deadline=deadline))
     inventory = _git(
         repo,
         "diff",
@@ -121,6 +333,7 @@ def compare(
         base,
         source,
         max_bytes=max(16 * 1024 * 1024, max_diff_bytes * 2),
+        deadline=deadline,
     )
     try:
         records = [part for part in inventory.split(b"\0") if part]
@@ -141,6 +354,7 @@ def compare(
         base,
         source,
         max_bytes=max(16 * 1024 * 1024, max_diff_bytes * 2),
+        deadline=deadline,
     )
     unsupported = []
     for row in numstat.split(b"\0"):
@@ -186,8 +400,11 @@ def compare(
         source,
     ]
     try:
+        timeout = 60.0 if deadline is None else min(60.0, deadline - time.monotonic())
+        if timeout <= 0:
+            raise TimeoutError("Git deadline expired")
         process = run_bounded(
-            command, env=env, max_output_bytes=max_diff_bytes, timeout_seconds=60
+            command, env=env, max_output_bytes=max_diff_bytes, timeout_seconds=timeout
         )
         raw = process.stdout
         exceeded = process.output_exceeded
@@ -214,7 +431,12 @@ def compare(
 
 
 def show_file(
-    comparison: Comparison, snapshot: str, path: str, max_bytes: int
+    comparison: Comparison,
+    snapshot: str,
+    path: str,
+    max_bytes: int,
+    *,
+    deadline: float | None = None,
 ) -> bytes:
     if snapshot not in ("head", "base", "target"):
         raise ComparisonError("unknown snapshot")
@@ -226,7 +448,9 @@ def show_file(
         "target": comparison.target,
     }[snapshot]
     # Git's -- path form avoids ambiguous rev:path syntax and option injection.
-    entry = _git(comparison.repo, "ls-tree", "-z", commit, "--", path)
+    entry = _git(
+        comparison.repo, "ls-tree", "-z", commit, "--", path, deadline=deadline
+    )
     records = [part for part in entry.split(b"\0") if part]
     matches = [
         record for record in records if record.split(b"\t", 1)[-1] == path.encode()
@@ -236,7 +460,16 @@ def show_file(
     ):
         raise ComparisonError("file missing or unsupported object type")
     blob = matches[0].split(b" ", 2)[2].split(b"\t", 1)[0].decode("ascii")
-    size = int(_git(comparison.repo, "cat-file", "-s", blob).decode())
+    size = int(
+        _git(comparison.repo, "cat-file", "-s", blob, deadline=deadline).decode()
+    )
     if size > max_bytes:
         raise ComparisonError("file exceeds evidence byte cap")
-    return _git(comparison.repo, "cat-file", "blob", blob, max_bytes=max_bytes)
+    return _git(
+        comparison.repo,
+        "cat-file",
+        "blob",
+        blob,
+        max_bytes=max_bytes,
+        deadline=deadline,
+    )

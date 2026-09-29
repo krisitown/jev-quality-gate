@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import math
 import time
+import asyncio
+from decimal import Decimal, InvalidOperation
 
 import httpx
 
@@ -38,7 +40,15 @@ def validate_answers(payload: object, questions: dict) -> dict:
         if abs(sum(probs.values()) - 1) > 0.020000001:
             raise InferenceError(f"{name}: probabilities do not sum to one")
         choice = answer.get("choice")
-        if choice not in probs or probs[choice] != max(probs.values()):
+        if (
+            not isinstance(choice, str)
+            or choice not in probs
+            # Native JSON probabilities can serialize a tie one floating-point
+            # rounding step apart. Preserve the provider's choice and raw scores.
+            or not math.isclose(
+                probs[choice], max(probs.values()), rel_tol=0, abs_tol=1e-12
+            )
+        ):
             raise InferenceError(f"{name}: selected choice is not a maximum")
         confidence = answer.get("confidence")
         if confidence is not None and (
@@ -57,12 +67,69 @@ def validate_answers(payload: object, questions: dict) -> dict:
     returned = payload.get("model")
     if returned is not None and returned != "typesafe-ai/jev":
         raise InferenceError("Gateway returned a different model identity")
+    metadata = payload.get("provider_metadata")
+    if isinstance(metadata, dict):
+        gateway = metadata.get("gateway")
+        routing = gateway.get("routing") if isinstance(gateway, dict) else None
+        if isinstance(routing, dict):
+            identities = [
+                routing.get(key) for key in ("originalModelId", "canonicalSlug")
+            ]
+            attempts = routing.get("modelAttempts", [])
+            if isinstance(attempts, list):
+                identities.extend(
+                    item.get("canonicalSlug")
+                    for item in attempts
+                    if isinstance(item, dict)
+                )
+            if any(
+                identity is not None and identity != "typesafe-ai/jev"
+                for identity in identities
+            ):
+                raise InferenceError(
+                    "Gateway routing included a different model identity"
+                )
     return normalized
+
+
+def response_telemetry(payload: dict, routing: dict, event: dict) -> dict:
+    """Preserve Gateway-native routing and decimal costs without inventing missing usage."""
+    metadata = payload.get("provider_metadata")
+    metadata = metadata if isinstance(metadata, dict) else {}
+    gateway = metadata.get("gateway")
+    gateway = gateway if isinstance(gateway, dict) else {}
+    cost = payload.get("cost", gateway.get("cost"))
+    cost_usd = None
+    if isinstance(cost, (str, int, float)) and not isinstance(cost, bool):
+        try:
+            value = Decimal(str(cost))
+            if value.is_finite() and value >= 0:
+                cost_usd = str(value)
+        except InvalidOperation:
+            pass
+    return {
+        "usage": payload.get("usage"),
+        "cost": cost,
+        "cost_usd": cost_usd,
+        "cost_source": "cost"
+        if "cost" in payload
+        else "provider_metadata.gateway.cost"
+        if "cost" in gateway
+        else None,
+        "model": payload.get("model"),
+        "routing": routing,
+        "provider_metadata": metadata,
+        "attempt": event,
+    }
 
 
 class Gateway:
     def __init__(
-        self, settings: dict, key: str, *, transport: httpx.BaseTransport | None = None
+        self,
+        settings: dict,
+        key: str,
+        *,
+        transport: httpx.AsyncBaseTransport | None = None,
     ):
         if not key:
             raise InferenceError("AI_GATEWAY_API_KEY is not configured")
@@ -71,6 +138,18 @@ class Gateway:
         self._transport = transport
 
     def evaluate(
+        self, state: dict, questions: dict, deadline: float, on_attempt
+    ) -> tuple[dict, dict]:
+        """Synchronous CLI/library entry point; async callers use evaluate_async."""
+        try:
+            asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(
+                self.evaluate_async(state, questions, deadline, on_attempt)
+            )
+        raise InferenceError("Use Gateway.evaluate_async inside an active event loop")
+
+    async def evaluate_async(
         self, state: dict, questions: dict, deadline: float, on_attempt
     ) -> tuple[dict, dict]:
         body = {"model": self.settings["model"], "state": state, "questions": questions}
@@ -96,10 +175,15 @@ class Gateway:
             )
             started = time.monotonic()
             try:
-                with httpx.Client(
-                    transport=self._transport, timeout=remaining, follow_redirects=False
-                ) as client:
-                    with client.stream(
+                async with (
+                    asyncio.timeout(remaining),
+                    httpx.AsyncClient(
+                        transport=self._transport,
+                        timeout=remaining,
+                        follow_redirects=False,
+                    ) as client,
+                ):
+                    async with client.stream(
                         "POST",
                         self.settings["endpoint"],
                         content=serialized,
@@ -110,7 +194,7 @@ class Gateway:
                         },
                     ) as response:
                         raw = bytearray()
-                        for piece in response.iter_bytes():
+                        async for piece in response.aiter_bytes():
                             raw.extend(piece)
                             if len(raw) > self.settings["max_response_bytes"]:
                                 on_attempt(
@@ -143,7 +227,7 @@ class Gateway:
                                 "x-vercel-ai-gateway-model",
                             }
                         }
-            except httpx.HTTPError as exc:
+            except (httpx.HTTPError, TimeoutError) as exc:
                 on_attempt(
                     {
                         "attempt": attempt + 1,
@@ -176,7 +260,7 @@ class Gateway:
                 on_attempt({**event, "status": "retry_503"})
                 if deadline - time.monotonic() <= 0.5:
                     raise InferenceError("Gateway 503 and deadline exhausted")
-                time.sleep(0.5)
+                await asyncio.sleep(0.5)
                 continue
             if status != 200:
                 on_attempt({**event, "status": "http_error"})
@@ -186,16 +270,14 @@ class Gateway:
             except (ValueError, UnicodeError) as exc:
                 on_attempt({**event, "status": "invalid_json"})
                 raise InferenceError("Gateway returned malformed JSON") from exc
-            answers = validate_answers(payload, questions)
+            try:
+                answers = validate_answers(payload, questions)
+            except InferenceError:
+                on_attempt({**event, "status": "invalid_answers"})
+                raise
             if response_redacted:
                 payload = strict_json(safe_raw)
-            safe = {
-                "usage": payload.get("usage"),
-                "cost": payload.get("cost"),
-                "model": payload.get("model"),
-                "routing": routing,
-                "attempt": event,
-            }
+            safe = response_telemetry(payload, routing, event)
             safe["credential_redacted_from_response"] = response_redacted
             on_attempt(
                 {
@@ -203,6 +285,7 @@ class Gateway:
                     "status": "validated",
                     "usage": safe["usage"],
                     "cost": safe["cost"],
+                    "cost_usd": safe["cost_usd"],
                     "model": safe["model"],
                 }
             )

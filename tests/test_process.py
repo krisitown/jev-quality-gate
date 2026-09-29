@@ -22,3 +22,18 @@ def test_subprocess_deadline_stops_hung_command():
             max_output_bytes=100,
             timeout_seconds=0.1,
         )
+
+
+def test_subprocess_bounded_input_uses_seekable_stdin():
+    result = run_bounded(
+        [
+            sys.executable,
+            "-c",
+            "import sys; sys.stdout.buffer.write(sys.stdin.buffer.read())",
+        ],
+        input_bytes=b"bounded input",
+        max_output_bytes=100,
+        timeout_seconds=5,
+    )
+    assert result.stdout == b"bounded input"
+    assert not result.output_exceeded

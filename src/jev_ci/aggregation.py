@@ -13,7 +13,11 @@ def aggregate(
     expected_chunks: list[str],
     unsupported: bool,
     incomplete: bool = False,
+    *,
+    reason_version: int = 2,
 ) -> dict:
+    if reason_version not in (1, 2):
+        raise ValueError("unsupported aggregation reason version")
     seen = {unit["chunk_id"] for unit in units if unit["unit_kind"] == "chunk"}
     unfinished = [chunk_id for chunk_id in expected_chunks if chunk_id not in seen]
     findings = []
@@ -40,21 +44,21 @@ def aggregate(
         outcome, reason = "uncertain", "disputed_finding"
     elif findings:
         outcome, reason = "violation", None
-    elif (
-        unfinished
-        or unsupported
-        or incomplete
-        or any(unit["outcome"] != "compliant" for unit in units)
-        or (
-            policy.data["aggregation"]["mode"] == "requires_reconciliation"
-            and (reconciliation is None or reconciliation["outcome"] != "compliant")
-        )
-    ):
+    elif unfinished or unsupported or incomplete:
         outcome, reason = "uncertain", "incomplete_coverage"
+    elif any(unit["outcome"] != "compliant" for unit in units) or (
+        policy.data["aggregation"]["mode"] == "requires_reconciliation"
+        and (reconciliation is None or reconciliation["outcome"] != "compliant")
+    ):
+        outcome, reason = (
+            "uncertain",
+            "unit_uncertainty" if reason_version == 2 else "incomplete_coverage",
+        )
     else:
         outcome, reason = "compliant", None
     action = policy.data["ci"].get(outcome, "report")
     return {
+        **({"reason_version": reason_version} if reason_version == 2 else {}),
         "schema_version": "jev.aggregate/0.1",
         "policy_id": policy.id,
         "outcome": outcome,

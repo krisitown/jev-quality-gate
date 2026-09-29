@@ -1,0 +1,1452 @@
+{
+  "schema_version": "jev.engineering-validation/1",
+  "tool_version": "0.2.0",
+  "report_date_local": "2026-09-30",
+  "timezone": "Europe/Sofia",
+  "selection_timestamp_utc": "2026-09-29T21:44:07Z",
+  "evaluator": "typesafe-ai/jev",
+  "endpoint": "https://ai-gateway.vercel.sh/typesafe/v1/systemone",
+  "thresholds_calibrated": false,
+  "candidate_code_executed": false,
+  "cases": [
+    {
+      "id": "flask-6145",
+      "repository": "pallets/flask",
+      "repository_url": "https://github.com/pallets/flask",
+      "pull_request": 6145,
+      "pull_request_url": "https://github.com/pallets/flask/pull/6145",
+      "head_commit": "56f3db172de7f3e843a3ebf048f6f475ef700b40",
+      "base_commit": "d318b683471101618febed18996405ad26462110",
+      "expected_merge_base": "d318b683471101618febed18996405ad26462110",
+      "language": "Python",
+      "license_family": "BSD-3-Clause",
+      "license_file": "LICENSE.txt",
+      "size": {
+        "changed_files": 2,
+        "changed_lines": 25,
+        "scoped_source_test_changed_lines": 25
+      },
+      "controls_sha256": {
+        "config.json": "75d6527cc946f95033712cc444860389843072c47518ad02706d00dd5bc7f846",
+        "policy.yaml": "8c45ad882f0a062fd1d3dccdd0b535d2068e034835518852ff3c38d8fd93e886",
+        "convention.md": "a37fd0cab8af0729868255ba3e1283be1b21e434be44ebc0ad13457738f5c17b"
+      }
+    },
+    {
+      "id": "gin-4806",
+      "repository": "gin-gonic/gin",
+      "repository_url": "https://github.com/gin-gonic/gin",
+      "pull_request": 4806,
+      "pull_request_url": "https://github.com/gin-gonic/gin/pull/4806",
+      "head_commit": "a27703b027a81de65d387bcb59d8cc6d904c7f03",
+      "base_commit": "05b14df992a31fe8ff567338bb6c934f1aa3872f",
+      "expected_merge_base": "05b14df992a31fe8ff567338bb6c934f1aa3872f",
+      "language": "Go",
+      "license_family": "MIT",
+      "license_file": "LICENSE",
+      "size": {
+        "changed_files": 6,
+        "changed_lines": 156,
+        "scoped_source_test_changed_lines": 156
+      },
+      "controls_sha256": {
+        "config.json": "93656d288249351bc433ee732ea97af99a96cad1afb50a662ad77c6584c4bfe1",
+        "policy.yaml": "a6f69a13cb7f612bbcaa372452f8a3e64c81c71154446c6011a2a641c430272d",
+        "convention.md": "f4afc7ce70309feb0a3e9831fdc3a517d4994eff01470ff870a9955f9c4bda87"
+      }
+    },
+    {
+      "id": "svelte-18535",
+      "repository": "sveltejs/svelte",
+      "repository_url": "https://github.com/sveltejs/svelte",
+      "pull_request": 18535,
+      "pull_request_url": "https://github.com/sveltejs/svelte/pull/18535",
+      "head_commit": "8d100d15c77b1a001700e29032761668cfbea461",
+      "base_commit": "b4d1583ae20f3869a88a731d9a265c546c099f66",
+      "expected_merge_base": "3d6da41b1d3aaf80b5e9cb9aa8aaa1f91ffc485b",
+      "language": "JavaScript/TypeScript (Svelte)",
+      "license_family": "MIT",
+      "license_file": "LICENSE.md",
+      "size": {
+        "changed_files": 46,
+        "changed_lines": 2269,
+        "scoped_source_test_changed_lines": 705,
+        "broader_source_test_changed_lines": 741
+      },
+      "controls_sha256": {
+        "config.json": "2c3121e4b0f1d6211f4461e07615311c9c70acccfd9d54f2de98856f9169755d",
+        "policy.yaml": "121a0262abc182cd02c81014b171cb7eec0a4be2518f655c873f0bd738ffdb19",
+        "convention.md": "a51c8b3232fc9764b1072f1acf8859908f6a662f4d79ef0653917a1ad022ad67"
+      }
+    }
+  ],
+  "attempts": {
+    "initial": [
+      {
+        "case": "flask-6145",
+        "elapsed_seconds": 4.298,
+        "exit_code": 0,
+        "status": "completed",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "43a5a1e9eec8afd89f5bab10",
+              "1ad079aab9b89367edd5d070"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "ac4a1c3f5e00a75bf1b5840a3208930df5b3783a5a5d7f2c0d8660b08a1e03aa",
+              "a3025133f3739d15482f0204080c50c62f9569dfbb6817dbec494a42a566e829"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "compliant",
+            "policy_id": "serialization-fallback-boundary",
+            "reason": null,
+            "reconciliation_id": "1fede18ad89ed5ced3305f5f",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 75,
+          "calls_used": 5,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 2,
+          "native_usage": {
+            "cost_reports": 5,
+            "cost_usd": "0.000698334",
+            "input_reports": 5,
+            "input_tokens": 16627,
+            "output_reports": 5,
+            "output_tokens": 1763
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed",
+          "status": "verified",
+          "validated_responses": 5,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 2
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 3
+        },
+        "pack_checksums_sha256": "f98f84da6acc7bcb246b902774d5944991cf70a4731d390c0597d97b0b31d15b",
+        "evaluation_timestamp_utc": "2026-09-29T21:49:50.238736+00:00"
+      },
+      {
+        "case": "gin-4806",
+        "elapsed_seconds": 7.267,
+        "exit_code": 0,
+        "status": "completed_with_findings",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "0b302e1776016da7725d7827",
+              "4524b6207fc30887226464e7",
+              "ab5b82b5ede643498ced6ed3",
+              "c5e22e43fc43bd6e05e3575c",
+              "cffe7f06376b3d76a18f6b39"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "bc0cc0a41d979efe216230b3817e86b72087605ae4958e0a1afb1ef50c0efc31",
+              "944db6386331a59e11a025d960bc886c621fed629b629016260faa7df2deffa6",
+              "fee1bac8c91bde7a4ddae2299a5229ef7cba4cc37005d867898dccd17111a2a3",
+              "93ab2328457b6dc4f10cdd68fa58b250b0aff612f5c24cecc6fb654b37adfc4c",
+              "1a67aa9be1ed08e883d3a570e2ecddd49001c0239331586b40b2ef1a24c5dd0e"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "routing-api-compatibility",
+            "reason": "incomplete_coverage",
+            "reconciliation_id": "34c6c63524f85de1e150867a",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 71,
+          "calls_used": 9,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 6,
+          "native_usage": {
+            "cost_reports": 9,
+            "cost_usd": "0.001644090",
+            "input_reports": 9,
+            "input_tokens": 39145,
+            "output_reports": 9,
+            "output_tokens": 4338
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed_with_findings",
+          "status": "verified",
+          "validated_responses": 9,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 3
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 5,
+          "candidate_gap": 1
+        },
+        "pack_checksums_sha256": "1a9a1d1d2f4c1265cbdf5eff6ce4c8d27a6c10baefb05f41550fdd6c2ca40320",
+        "evaluation_timestamp_utc": "2026-09-29T21:49:54.634425+00:00"
+      },
+      {
+        "case": "svelte-18535",
+        "elapsed_seconds": 39.077,
+        "exit_code": 0,
+        "status": "completed_with_findings",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "4b8bf1c2c25882a6fcb15435",
+              "425294c2e78480db39f32a8a",
+              "abe2d2f4472f29290aacf6d8",
+              "1fb64d9c5ab102d3f039a153",
+              "b24df63c5599032fea10346f",
+              "148b3aa85f69cf7f39469cf1",
+              "94830f6df8f28fb0b51afee3",
+              "fe9800f63989b61e2fdd949c",
+              "93be29591d6c1c6deb44edcc",
+              "a689b8d72b4f81e73e42504c",
+              "b93c15b2e232243e0c75c946",
+              "a9cec811e7fc60750fe38047",
+              "fc1d7fc328b58783042c309b",
+              "358a12631f2cdf615108a02e",
+              "e6b25166f6ce0fce891e927d",
+              "7e765fe3770be4c9d6075088",
+              "45adccf6502c4a4e63c34e87",
+              "dd4bae9674a078559028daac",
+              "e7184956e0f5257c33d93b0b",
+              "0fa46ca3372d61f9dd55d73f",
+              "c8614f6010bbac9787c54fa3",
+              "57126565f042bc3c79aee1d9",
+              "b988106f3dbdfd251fbbcc2e",
+              "2b7f9f51920c4b76c47e6dc7",
+              "b6ba85d761bd67f22683677d",
+              "65e42011216b0f82c7f20324",
+              "08cc4b50569afcb29e49c55a",
+              "6ee4828f14542924ecc80f17",
+              "c496f5e8f61396ede10463f2",
+              "faa07008484457c57dd4f8c5"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "0161cf76460ea9c7007b8e988f851cb63a0d7b8681100e73046e07ad1f9544fb",
+              "aea7122d40b354846f406e395dcbd5952ac322c687abe8ac97e3636e919169ba",
+              "c7f4fff92da555c835c00e5b506b5a5a8b2cd404a0cf1b047faf3b09f297a0b3",
+              "41feaeb7b69a31823229f823d23206d1da6022b55e5faf5260f72f725da6419a",
+              "2565c98db0105cbc01b29f84021a20258b69773913b85e820d78cd46f5808957",
+              "e6fe5be71bdd216dd5fbcfb6f92555648ad945dc4edf76aa93dc832b0d210071",
+              "398cbf5b33b6488c5eedc15eaabf3ee852920feeba15576ec0589a1e00b6d527",
+              "c3df3ae2776bced1fd161493c8f63d4c7b18b8f68a342b3669444df8e85f4d15",
+              "c065714d4ac19422f04483397f9ea6d419137a4d197cc4957cf5e67ab0225c1b",
+              "e0519019eca2c2922efe8976c4fc2fb1bc2be9419d8cbda14dd666d98a510738",
+              "7f06e671413785a1d027a95b0108d59802a1d18a0d7f9edb423cb3f88e689a60",
+              "70eb9def1f43e7eab2b349ad5f2e4d6e50d61410bfc476bbd2943b8e451d31a6",
+              "a3cf806e98785fc5f9ec5c48db6933d40251002b42c2cbc568c19b8dca85d7ea",
+              "de6e712d786e3ac1c8321d2c8efaa0aec0dc681774abbafb3448f20fa5eee800",
+              "6d946cadef16b42f133bc692202b6fe81ad678bd08640e3adfc3b3360ed170d3",
+              "31d133c706992d91398cc23e1c2e55bba3f1cc8d5c06b33b2bef142d6aa6b3ab",
+              "9f7e0459dc2336769875c03bff7dbf00f8339c739c09e87222286be095b07b2f",
+              "551225d5915adbefc27fbe26a5edde1f48b6b6c4110b1245740d04924ee760c9",
+              "489c9444028d0d280c31fbf126fb166e0e034490d1087a0d0ddaf28542e3cf3e",
+              "bdffc34a3970e96defa49d44eb69eec39b90461b4a068bf659d84aaf9ecdb150",
+              "d03b121d7cbe60630b5d3af1c47bad18c8f50a50804ba9ed6d6d8c2de588138a",
+              "80cfc87182ed43c5857378992a445598a29409baa4006eeea33da943d0f16155",
+              "5579a4b287eaf3905dc508d631a6ce750246d17a36dd909d05bb1fe316d41828",
+              "a595166e8027092718004e39c84480b483948d3c902c8497836fce7fd27f3c76",
+              "0acd74ce46969ad89221d5b2e4d6b9f1cf9a2555eb1c9105e36cc3f276e88678",
+              "ed75c81133fd9e4d1b34e07680b9bce8c27c2336025cd22f9dc46ca4e0b05d32",
+              "e8fedcc994efd57a1b1c58fa3c69d18df7f40cf3fab371f9bab4b697319a2a61",
+              "29df50a22ba734b1b635e79f705b24bd33d3ec3be1c778949c3798c837b72a32",
+              "76bbcf167497e3aefafcf75bcf2a773300a6f45cb3ec2926204e6b0f5f9e9c42",
+              "580b7d15acdb6033e38b6a6d707e00cd5a23b23d5f64bbe4c039bfceba6a61e3"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "incomplete_coverage",
+            "reconciliation_id": "3b86aab56896b702bb0e26e4",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 32,
+          "calls_used": 48,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 53,
+          "native_usage": {
+            "cost_reports": 48,
+            "cost_usd": "0.012859896",
+            "input_reports": 48,
+            "input_tokens": 306188,
+            "output_reports": 48,
+            "output_tokens": 39794
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed_with_findings",
+          "status": "verified",
+          "validated_responses": 48,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 12,
+          "GET_DIFF_CHUNK": 5
+        },
+        "unit_reasons": {
+          "model_uncertain": 6,
+          "candidate_gap": 16,
+          "candidate_menu_incomplete": 9
+        },
+        "pack_checksums_sha256": "8dbf5c21bc7f6cf6d2b85f175851106be8adfd572c745f65d0d5def57f10ee2a",
+        "evaluation_timestamp_utc": "2026-09-29T21:50:02.051155+00:00"
+      }
+    ],
+    "after_menu_fix_before_float_tie_fix": [
+      {
+        "case": "flask-6145",
+        "elapsed_seconds": 3.342,
+        "exit_code": 0,
+        "status": "completed",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "43a5a1e9eec8afd89f5bab10",
+              "1ad079aab9b89367edd5d070"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "ac4a1c3f5e00a75bf1b5840a3208930df5b3783a5a5d7f2c0d8660b08a1e03aa",
+              "a3025133f3739d15482f0204080c50c62f9569dfbb6817dbec494a42a566e829"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "compliant",
+            "policy_id": "serialization-fallback-boundary",
+            "reason": null,
+            "reconciliation_id": "1fede18ad89ed5ced3305f5f",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "diagnostics": [],
+        "coverage": {
+          "calls_remaining": 75,
+          "calls_used": 5,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 2,
+          "native_usage": {
+            "cost_reports": 5,
+            "cost_usd": "0.000698334",
+            "input_reports": 5,
+            "input_tokens": 16627,
+            "output_reports": 5,
+            "output_tokens": 1763
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed",
+          "status": "verified",
+          "validated_responses": 5,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 2
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 3
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:54:32.319007+00:00",
+        "pack_checksums_sha256": "47df073d8ec023048427d7595ac6b8ebebe32044edd904dc462fd9f797b5bee5"
+      },
+      {
+        "case": "gin-4806",
+        "elapsed_seconds": 5.686,
+        "exit_code": 0,
+        "status": "completed_with_findings",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "0b302e1776016da7725d7827",
+              "4524b6207fc30887226464e7",
+              "ab5b82b5ede643498ced6ed3",
+              "c5e22e43fc43bd6e05e3575c",
+              "cffe7f06376b3d76a18f6b39"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "bc0cc0a41d979efe216230b3817e86b72087605ae4958e0a1afb1ef50c0efc31",
+              "944db6386331a59e11a025d960bc886c621fed629b629016260faa7df2deffa6",
+              "fee1bac8c91bde7a4ddae2299a5229ef7cba4cc37005d867898dccd17111a2a3",
+              "93ab2328457b6dc4f10cdd68fa58b250b0aff612f5c24cecc6fb654b37adfc4c",
+              "1a67aa9be1ed08e883d3a570e2ecddd49001c0239331586b40b2ef1a24c5dd0e"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "routing-api-compatibility",
+            "reason": "incomplete_coverage",
+            "reconciliation_id": "34c6c63524f85de1e150867a",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "calls": 1,
+            "chunk_id": null,
+            "outcome": "uncertain",
+            "policy_id": "routing-api-compatibility",
+            "reason": "candidate_gap",
+            "unit_id": "34c6c63524f85de1e150867a",
+            "unit_kind": "reconciliation"
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 71,
+          "calls_used": 9,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 6,
+          "native_usage": {
+            "cost_reports": 9,
+            "cost_usd": "0.001644090",
+            "input_reports": 9,
+            "input_tokens": 39145,
+            "output_reports": 9,
+            "output_tokens": 4336
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed_with_findings",
+          "status": "verified",
+          "validated_responses": 9,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 3
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 5,
+          "candidate_gap": 1
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:54:35.726530+00:00",
+        "pack_checksums_sha256": "9ad5d40b0312474360ba38a9755452c7ef9bc1a12178bf14a9b21b2cc6745b44"
+      },
+      {
+        "case": "svelte-18535",
+        "elapsed_seconds": 19.361,
+        "exit_code": 2,
+        "status": "error",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "4b8bf1c2c25882a6fcb15435",
+              "425294c2e78480db39f32a8a",
+              "abe2d2f4472f29290aacf6d8",
+              "1fb64d9c5ab102d3f039a153",
+              "b24df63c5599032fea10346f",
+              "148b3aa85f69cf7f39469cf1",
+              "94830f6df8f28fb0b51afee3",
+              "fe9800f63989b61e2fdd949c",
+              "93be29591d6c1c6deb44edcc",
+              "a689b8d72b4f81e73e42504c",
+              "b93c15b2e232243e0c75c946",
+              "a9cec811e7fc60750fe38047",
+              "fc1d7fc328b58783042c309b",
+              "358a12631f2cdf615108a02e"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "0161cf76460ea9c7007b8e988f851cb63a0d7b8681100e73046e07ad1f9544fb",
+              "aea7122d40b354846f406e395dcbd5952ac322c687abe8ac97e3636e919169ba",
+              "c7f4fff92da555c835c00e5b506b5a5a8b2cd404a0cf1b047faf3b09f297a0b3",
+              "41feaeb7b69a31823229f823d23206d1da6022b55e5faf5260f72f725da6419a",
+              "2565c98db0105cbc01b29f84021a20258b69773913b85e820d78cd46f5808957",
+              "e6fe5be71bdd216dd5fbcfb6f92555648ad945dc4edf76aa93dc832b0d210071",
+              "398cbf5b33b6488c5eedc15eaabf3ee852920feeba15576ec0589a1e00b6d527",
+              "c3df3ae2776bced1fd161493c8f63d4c7b18b8f68a342b3669444df8e85f4d15",
+              "c065714d4ac19422f04483397f9ea6d419137a4d197cc4957cf5e67ab0225c1b",
+              "e0519019eca2c2922efe8976c4fc2fb1bc2be9419d8cbda14dd666d98a510738",
+              "7f06e671413785a1d027a95b0108d59802a1d18a0d7f9edb423cb3f88e689a60",
+              "70eb9def1f43e7eab2b349ad5f2e4d6e50d61410bfc476bbd2943b8e451d31a6",
+              "a3cf806e98785fc5f9ec5c48db6933d40251002b42c2cbc568c19b8dca85d7ea",
+              "de6e712d786e3ac1c8321d2c8efaa0aec0dc681774abbafb3448f20fa5eee800",
+              "6d946cadef16b42f133bc692202b6fe81ad678bd08640e3adfc3b3360ed170d3",
+              "31d133c706992d91398cc23e1c2e55bba3f1cc8d5c06b33b2bef142d6aa6b3ab",
+              "9f7e0459dc2336769875c03bff7dbf00f8339c739c09e87222286be095b07b2f",
+              "551225d5915adbefc27fbe26a5edde1f48b6b6c4110b1245740d04924ee760c9",
+              "489c9444028d0d280c31fbf126fb166e0e034490d1087a0d0ddaf28542e3cf3e",
+              "bdffc34a3970e96defa49d44eb69eec39b90461b4a068bf659d84aaf9ecdb150",
+              "d03b121d7cbe60630b5d3af1c47bad18c8f50a50804ba9ed6d6d8c2de588138a",
+              "80cfc87182ed43c5857378992a445598a29409baa4006eeea33da943d0f16155",
+              "5579a4b287eaf3905dc508d631a6ce750246d17a36dd909d05bb1fe316d41828",
+              "a595166e8027092718004e39c84480b483948d3c902c8497836fce7fd27f3c76",
+              "0acd74ce46969ad89221d5b2e4d6b9f1cf9a2555eb1c9105e36cc3f276e88678",
+              "ed75c81133fd9e4d1b34e07680b9bce8c27c2336025cd22f9dc46ca4e0b05d32",
+              "e8fedcc994efd57a1b1c58fa3c69d18df7f40cf3fab371f9bab4b697319a2a61",
+              "29df50a22ba734b1b635e79f705b24bd33d3ec3be1c778949c3798c837b72a32",
+              "76bbcf167497e3aefafcf75bcf2a773300a6f45cb3ec2926204e6b0f5f9e9c42",
+              "580b7d15acdb6033e38b6a6d707e00cd5a23b23d5f64bbe4c039bfceba6a61e3"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "incomplete_coverage",
+            "reconciliation_id": null,
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": [
+              "6d946cadef16b42f133bc692202b6fe81ad678bd08640e3adfc3b3360ed170d3",
+              "31d133c706992d91398cc23e1c2e55bba3f1cc8d5c06b33b2bef142d6aa6b3ab",
+              "9f7e0459dc2336769875c03bff7dbf00f8339c739c09e87222286be095b07b2f",
+              "551225d5915adbefc27fbe26a5edde1f48b6b6c4110b1245740d04924ee760c9",
+              "489c9444028d0d280c31fbf126fb166e0e034490d1087a0d0ddaf28542e3cf3e",
+              "bdffc34a3970e96defa49d44eb69eec39b90461b4a068bf659d84aaf9ecdb150",
+              "d03b121d7cbe60630b5d3af1c47bad18c8f50a50804ba9ed6d6d8c2de588138a",
+              "80cfc87182ed43c5857378992a445598a29409baa4006eeea33da943d0f16155",
+              "5579a4b287eaf3905dc508d631a6ce750246d17a36dd909d05bb1fe316d41828",
+              "a595166e8027092718004e39c84480b483948d3c902c8497836fce7fd27f3c76",
+              "0acd74ce46969ad89221d5b2e4d6b9f1cf9a2555eb1c9105e36cc3f276e88678",
+              "ed75c81133fd9e4d1b34e07680b9bce8c27c2336025cd22f9dc46ca4e0b05d32",
+              "e8fedcc994efd57a1b1c58fa3c69d18df7f40cf3fab371f9bab4b697319a2a61",
+              "29df50a22ba734b1b635e79f705b24bd33d3ec3be1c778949c3798c837b72a32",
+              "76bbcf167497e3aefafcf75bcf2a773300a6f45cb3ec2926204e6b0f5f9e9c42",
+              "580b7d15acdb6033e38b6a6d707e00cd5a23b23d5f64bbe4c039bfceba6a61e3"
+            ]
+          }
+        ],
+        "diagnostics": [
+          {
+            "calls": 1,
+            "chunk_id": "0161cf76460ea9c7007b8e988f851cb63a0d7b8681100e73046e07ad1f9544fb",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "4b8bf1c2c25882a6fcb15435",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "aea7122d40b354846f406e395dcbd5952ac322c687abe8ac97e3636e919169ba",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "425294c2e78480db39f32a8a",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "c7f4fff92da555c835c00e5b506b5a5a8b2cd404a0cf1b047faf3b09f297a0b3",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "abe2d2f4472f29290aacf6d8",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 4,
+            "chunk_id": "41feaeb7b69a31823229f823d23206d1da6022b55e5faf5260f72f725da6419a",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "1fb64d9c5ab102d3f039a153",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "2565c98db0105cbc01b29f84021a20258b69773913b85e820d78cd46f5808957",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "b24df63c5599032fea10346f",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "e6fe5be71bdd216dd5fbcfb6f92555648ad945dc4edf76aa93dc832b0d210071",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "148b3aa85f69cf7f39469cf1",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "398cbf5b33b6488c5eedc15eaabf3ee852920feeba15576ec0589a1e00b6d527",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "94830f6df8f28fb0b51afee3",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "c3df3ae2776bced1fd161493c8f63d4c7b18b8f68a342b3669444df8e85f4d15",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "fe9800f63989b61e2fdd949c",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "c065714d4ac19422f04483397f9ea6d419137a4d197cc4957cf5e67ab0225c1b",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "93be29591d6c1c6deb44edcc",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "e0519019eca2c2922efe8976c4fc2fb1bc2be9419d8cbda14dd666d98a510738",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "a689b8d72b4f81e73e42504c",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "7f06e671413785a1d027a95b0108d59802a1d18a0d7f9edb423cb3f88e689a60",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "b93c15b2e232243e0c75c946",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "70eb9def1f43e7eab2b349ad5f2e4d6e50d61410bfc476bbd2943b8e451d31a6",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "a9cec811e7fc60750fe38047",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "a3cf806e98785fc5f9ec5c48db6933d40251002b42c2cbc568c19b8dca85d7ea",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "fc1d7fc328b58783042c309b",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "de6e712d786e3ac1c8321d2c8efaa0aec0dc681774abbafb3448f20fa5eee800",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "inference_error",
+            "unit_id": "358a12631f2cdf615108a02e",
+            "unit_kind": "chunk"
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 50,
+          "calls_used": 30,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 53,
+          "native_usage": {
+            "cost_reports": 29,
+            "cost_usd": "0.009228030",
+            "input_reports": 29,
+            "input_tokens": 219715,
+            "output_reports": 29,
+            "output_tokens": 24544
+          }
+        },
+        "errors": [
+          "next_request: selected choice is not a maximum"
+        ],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "error",
+          "status": "verified",
+          "validated_responses": 29,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 10,
+          "GET_DOCUMENT": 6
+        },
+        "unit_reasons": {
+          "candidate_menu_incomplete": 6,
+          "candidate_gap": 7,
+          "inference_error": 1
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:54:41.561353+00:00",
+        "pack_checksums_sha256": "70672c1545f3b6a3f3b1862d9b82b4d56ab1965f9520a60852c784dc79a37be8"
+      }
+    ],
+    "release": [
+      {
+        "case": "flask-6145",
+        "elapsed_seconds": 3.19,
+        "exit_code": 0,
+        "status": "completed",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "43a5a1e9eec8afd89f5bab10",
+              "1ad079aab9b89367edd5d070"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "ac4a1c3f5e00a75bf1b5840a3208930df5b3783a5a5d7f2c0d8660b08a1e03aa",
+              "a3025133f3739d15482f0204080c50c62f9569dfbb6817dbec494a42a566e829"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "compliant",
+            "policy_id": "serialization-fallback-boundary",
+            "reason": null,
+            "reason_version": 2,
+            "reconciliation_id": "1fede18ad89ed5ced3305f5f",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "diagnostics": [],
+        "coverage": {
+          "calls_remaining": 75,
+          "calls_used": 5,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 2,
+          "native_usage": {
+            "cost_reports": 5,
+            "cost_usd": "0.000698334",
+            "input_reports": 5,
+            "input_tokens": 16627,
+            "output_reports": 5,
+            "output_tokens": 1763
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed",
+          "status": "verified",
+          "validated_responses": 5,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 2
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 3
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:58:34.525127+00:00",
+        "pack_checksums_sha256": "85e8de4004bcc29b156eff1565a30083aba6d98a21d7b46dc98820e1429435e2",
+        "run_id": "0f4337a7807a4734915007083a75afba",
+        "tool_version": "0.2.0"
+      },
+      {
+        "case": "gin-4806",
+        "elapsed_seconds": 6.136,
+        "exit_code": 0,
+        "status": "completed_with_findings",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "0b302e1776016da7725d7827",
+              "4524b6207fc30887226464e7",
+              "ab5b82b5ede643498ced6ed3",
+              "c5e22e43fc43bd6e05e3575c",
+              "cffe7f06376b3d76a18f6b39"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "bc0cc0a41d979efe216230b3817e86b72087605ae4958e0a1afb1ef50c0efc31",
+              "944db6386331a59e11a025d960bc886c621fed629b629016260faa7df2deffa6",
+              "fee1bac8c91bde7a4ddae2299a5229ef7cba4cc37005d867898dccd17111a2a3",
+              "93ab2328457b6dc4f10cdd68fa58b250b0aff612f5c24cecc6fb654b37adfc4c",
+              "1a67aa9be1ed08e883d3a570e2ecddd49001c0239331586b40b2ef1a24c5dd0e"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "routing-api-compatibility",
+            "reason": "unit_uncertainty",
+            "reason_version": 2,
+            "reconciliation_id": "34c6c63524f85de1e150867a",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "calls": 1,
+            "chunk_id": null,
+            "outcome": "uncertain",
+            "policy_id": "routing-api-compatibility",
+            "reason": "candidate_gap",
+            "unit_id": "34c6c63524f85de1e150867a",
+            "unit_kind": "reconciliation"
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 71,
+          "calls_used": 9,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 6,
+          "native_usage": {
+            "cost_reports": 9,
+            "cost_usd": "0.001644090",
+            "input_reports": 9,
+            "input_tokens": 39145,
+            "output_reports": 9,
+            "output_tokens": 4336
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed_with_findings",
+          "status": "verified",
+          "validated_responses": 9,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 3
+        },
+        "unit_reasons": {
+          "compliant_or_supported_violation": 5,
+          "candidate_gap": 1
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:58:37.790833+00:00",
+        "pack_checksums_sha256": "1c44cc87043728db6914128a550b397ec97a2cc520eb664d0281687356348398",
+        "run_id": "c6dbd69861894490b1ca7ade875d2ad9",
+        "tool_version": "0.2.0"
+      },
+      {
+        "case": "svelte-18535",
+        "elapsed_seconds": 33.265,
+        "exit_code": 0,
+        "status": "completed_with_findings",
+        "policies": [
+          {
+            "action": "report",
+            "completed_units": [
+              "4b8bf1c2c25882a6fcb15435",
+              "425294c2e78480db39f32a8a",
+              "abe2d2f4472f29290aacf6d8",
+              "1fb64d9c5ab102d3f039a153",
+              "b24df63c5599032fea10346f",
+              "148b3aa85f69cf7f39469cf1",
+              "94830f6df8f28fb0b51afee3",
+              "fe9800f63989b61e2fdd949c",
+              "93be29591d6c1c6deb44edcc",
+              "a689b8d72b4f81e73e42504c",
+              "b93c15b2e232243e0c75c946",
+              "a9cec811e7fc60750fe38047",
+              "fc1d7fc328b58783042c309b",
+              "358a12631f2cdf615108a02e",
+              "e6b25166f6ce0fce891e927d",
+              "7e765fe3770be4c9d6075088",
+              "45adccf6502c4a4e63c34e87",
+              "dd4bae9674a078559028daac",
+              "e7184956e0f5257c33d93b0b",
+              "0fa46ca3372d61f9dd55d73f",
+              "c8614f6010bbac9787c54fa3",
+              "57126565f042bc3c79aee1d9",
+              "b988106f3dbdfd251fbbcc2e",
+              "2b7f9f51920c4b76c47e6dc7",
+              "b6ba85d761bd67f22683677d",
+              "65e42011216b0f82c7f20324",
+              "08cc4b50569afcb29e49c55a",
+              "6ee4828f14542924ecc80f17",
+              "c496f5e8f61396ede10463f2",
+              "faa07008484457c57dd4f8c5"
+            ],
+            "confidence": null,
+            "conflicts": [],
+            "expected_chunks": [
+              "0161cf76460ea9c7007b8e988f851cb63a0d7b8681100e73046e07ad1f9544fb",
+              "aea7122d40b354846f406e395dcbd5952ac322c687abe8ac97e3636e919169ba",
+              "c7f4fff92da555c835c00e5b506b5a5a8b2cd404a0cf1b047faf3b09f297a0b3",
+              "41feaeb7b69a31823229f823d23206d1da6022b55e5faf5260f72f725da6419a",
+              "2565c98db0105cbc01b29f84021a20258b69773913b85e820d78cd46f5808957",
+              "e6fe5be71bdd216dd5fbcfb6f92555648ad945dc4edf76aa93dc832b0d210071",
+              "398cbf5b33b6488c5eedc15eaabf3ee852920feeba15576ec0589a1e00b6d527",
+              "c3df3ae2776bced1fd161493c8f63d4c7b18b8f68a342b3669444df8e85f4d15",
+              "c065714d4ac19422f04483397f9ea6d419137a4d197cc4957cf5e67ab0225c1b",
+              "e0519019eca2c2922efe8976c4fc2fb1bc2be9419d8cbda14dd666d98a510738",
+              "7f06e671413785a1d027a95b0108d59802a1d18a0d7f9edb423cb3f88e689a60",
+              "70eb9def1f43e7eab2b349ad5f2e4d6e50d61410bfc476bbd2943b8e451d31a6",
+              "a3cf806e98785fc5f9ec5c48db6933d40251002b42c2cbc568c19b8dca85d7ea",
+              "de6e712d786e3ac1c8321d2c8efaa0aec0dc681774abbafb3448f20fa5eee800",
+              "6d946cadef16b42f133bc692202b6fe81ad678bd08640e3adfc3b3360ed170d3",
+              "31d133c706992d91398cc23e1c2e55bba3f1cc8d5c06b33b2bef142d6aa6b3ab",
+              "9f7e0459dc2336769875c03bff7dbf00f8339c739c09e87222286be095b07b2f",
+              "551225d5915adbefc27fbe26a5edde1f48b6b6c4110b1245740d04924ee760c9",
+              "489c9444028d0d280c31fbf126fb166e0e034490d1087a0d0ddaf28542e3cf3e",
+              "bdffc34a3970e96defa49d44eb69eec39b90461b4a068bf659d84aaf9ecdb150",
+              "d03b121d7cbe60630b5d3af1c47bad18c8f50a50804ba9ed6d6d8c2de588138a",
+              "80cfc87182ed43c5857378992a445598a29409baa4006eeea33da943d0f16155",
+              "5579a4b287eaf3905dc508d631a6ce750246d17a36dd909d05bb1fe316d41828",
+              "a595166e8027092718004e39c84480b483948d3c902c8497836fce7fd27f3c76",
+              "0acd74ce46969ad89221d5b2e4d6b9f1cf9a2555eb1c9105e36cc3f276e88678",
+              "ed75c81133fd9e4d1b34e07680b9bce8c27c2336025cd22f9dc46ca4e0b05d32",
+              "e8fedcc994efd57a1b1c58fa3c69d18df7f40cf3fab371f9bab4b697319a2a61",
+              "29df50a22ba734b1b635e79f705b24bd33d3ec3be1c778949c3798c837b72a32",
+              "76bbcf167497e3aefafcf75bcf2a773300a6f45cb3ec2926204e6b0f5f9e9c42",
+              "580b7d15acdb6033e38b6a6d707e00cd5a23b23d5f64bbe4c039bfceba6a61e3"
+            ],
+            "findings": [],
+            "incomplete_coverage": false,
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "unit_uncertainty",
+            "reason_version": 2,
+            "reconciliation_id": "3b86aab56896b702bb0e26e4",
+            "schema_version": "jev.aggregate/0.1",
+            "unsupported_content": false,
+            "unvisited_chunks": []
+          }
+        ],
+        "diagnostics": [
+          {
+            "calls": 1,
+            "chunk_id": "0161cf76460ea9c7007b8e988f851cb63a0d7b8681100e73046e07ad1f9544fb",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "4b8bf1c2c25882a6fcb15435",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "aea7122d40b354846f406e395dcbd5952ac322c687abe8ac97e3636e919169ba",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "425294c2e78480db39f32a8a",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 4,
+            "chunk_id": "c7f4fff92da555c835c00e5b506b5a5a8b2cd404a0cf1b047faf3b09f297a0b3",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "abe2d2f4472f29290aacf6d8",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "41feaeb7b69a31823229f823d23206d1da6022b55e5faf5260f72f725da6419a",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "1fb64d9c5ab102d3f039a153",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "2565c98db0105cbc01b29f84021a20258b69773913b85e820d78cd46f5808957",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "b24df63c5599032fea10346f",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "e6fe5be71bdd216dd5fbcfb6f92555648ad945dc4edf76aa93dc832b0d210071",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "148b3aa85f69cf7f39469cf1",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "398cbf5b33b6488c5eedc15eaabf3ee852920feeba15576ec0589a1e00b6d527",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "94830f6df8f28fb0b51afee3",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "c3df3ae2776bced1fd161493c8f63d4c7b18b8f68a342b3669444df8e85f4d15",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "fe9800f63989b61e2fdd949c",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "c065714d4ac19422f04483397f9ea6d419137a4d197cc4957cf5e67ab0225c1b",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "93be29591d6c1c6deb44edcc",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 3,
+            "chunk_id": "e0519019eca2c2922efe8976c4fc2fb1bc2be9419d8cbda14dd666d98a510738",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "a689b8d72b4f81e73e42504c",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "7f06e671413785a1d027a95b0108d59802a1d18a0d7f9edb423cb3f88e689a60",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "b93c15b2e232243e0c75c946",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "70eb9def1f43e7eab2b349ad5f2e4d6e50d61410bfc476bbd2943b8e451d31a6",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "a9cec811e7fc60750fe38047",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "a3cf806e98785fc5f9ec5c48db6933d40251002b42c2cbc568c19b8dca85d7ea",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "fc1d7fc328b58783042c309b",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "de6e712d786e3ac1c8321d2c8efaa0aec0dc681774abbafb3448f20fa5eee800",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "358a12631f2cdf615108a02e",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "6d946cadef16b42f133bc692202b6fe81ad678bd08640e3adfc3b3360ed170d3",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "e6b25166f6ce0fce891e927d",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "31d133c706992d91398cc23e1c2e55bba3f1cc8d5c06b33b2bef142d6aa6b3ab",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "7e765fe3770be4c9d6075088",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "9f7e0459dc2336769875c03bff7dbf00f8339c739c09e87222286be095b07b2f",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_menu_incomplete",
+            "unit_id": "45adccf6502c4a4e63c34e87",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "551225d5915adbefc27fbe26a5edde1f48b6b6c4110b1245740d04924ee760c9",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "model_uncertain",
+            "unit_id": "dd4bae9674a078559028daac",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "489c9444028d0d280c31fbf126fb166e0e034490d1087a0d0ddaf28542e3cf3e",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "e7184956e0f5257c33d93b0b",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "bdffc34a3970e96defa49d44eb69eec39b90461b4a068bf659d84aaf9ecdb150",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "0fa46ca3372d61f9dd55d73f",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "d03b121d7cbe60630b5d3af1c47bad18c8f50a50804ba9ed6d6d8c2de588138a",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "model_uncertain",
+            "unit_id": "c8614f6010bbac9787c54fa3",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "80cfc87182ed43c5857378992a445598a29409baa4006eeea33da943d0f16155",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "57126565f042bc3c79aee1d9",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "5579a4b287eaf3905dc508d631a6ce750246d17a36dd909d05bb1fe316d41828",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "b988106f3dbdfd251fbbcc2e",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "a595166e8027092718004e39c84480b483948d3c902c8497836fce7fd27f3c76",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "2b7f9f51920c4b76c47e6dc7",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "0acd74ce46969ad89221d5b2e4d6b9f1cf9a2555eb1c9105e36cc3f276e88678",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "b6ba85d761bd67f22683677d",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "ed75c81133fd9e4d1b34e07680b9bce8c27c2336025cd22f9dc46ca4e0b05d32",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "65e42011216b0f82c7f20324",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "e8fedcc994efd57a1b1c58fa3c69d18df7f40cf3fab371f9bab4b697319a2a61",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "08cc4b50569afcb29e49c55a",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "29df50a22ba734b1b635e79f705b24bd33d3ec3be1c778949c3798c837b72a32",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "6ee4828f14542924ecc80f17",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 1,
+            "chunk_id": "76bbcf167497e3aefafcf75bcf2a773300a6f45cb3ec2926204e6b0f5f9e9c42",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "c496f5e8f61396ede10463f2",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": "580b7d15acdb6033e38b6a6d707e00cd5a23b23d5f64bbe4c039bfceba6a61e3",
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "faa07008484457c57dd4f8c5",
+            "unit_kind": "chunk"
+          },
+          {
+            "calls": 2,
+            "chunk_id": null,
+            "outcome": "uncertain",
+            "policy_id": "reactive-state-observer-consistency",
+            "reason": "candidate_gap",
+            "unit_id": "3b86aab56896b702bb0e26e4",
+            "unit_kind": "reconciliation"
+          }
+        ],
+        "coverage": {
+          "calls_remaining": 25,
+          "calls_used": 55,
+          "chunk_reason": null,
+          "chunk_status": "complete",
+          "chunks": 53,
+          "native_usage": {
+            "cost_reports": 55,
+            "cost_usd": "0.016634100",
+            "input_reports": 55,
+            "input_tokens": 396050,
+            "output_reports": 55,
+            "output_tokens": 46123
+          }
+        },
+        "errors": [],
+        "replay": {
+          "replayed_aggregates": 1,
+          "run_status": "completed_with_findings",
+          "status": "verified",
+          "validated_responses": 55,
+          "verification_scope": "integrity_linkage_and_deterministic_aggregation"
+        },
+        "retrieval_types": {
+          "GET_FILE": 11,
+          "GET_DOCUMENT": 13
+        },
+        "unit_reasons": {
+          "candidate_gap": 23,
+          "candidate_menu_incomplete": 6,
+          "model_uncertain": 2
+        },
+        "evaluation_timestamp_utc": "2026-09-29T21:58:44.072727+00:00",
+        "pack_checksums_sha256": "b10d98a932e13b4cb55e4ff2d33713d3a314430eafc534d95a1e5ba1d6782b18",
+        "run_id": "0f4931ed0be14d64baf9ae284ede5b10",
+        "tool_version": "0.2.0"
+      }
+    ]
+  },
+  "supplemental_ripwire": {
+    "case": "gin-4806",
+    "providers": [
+      "git-exact",
+      "ripwire"
+    ],
+    "outcome": "uncertain",
+    "coverage": {
+      "calls_remaining": 71,
+      "calls_used": 9,
+      "chunk_reason": null,
+      "chunk_status": "complete",
+      "chunks": 6,
+      "native_usage": {
+        "cost_reports": 9,
+        "cost_usd": "0.002549526",
+        "input_reports": 9,
+        "input_tokens": 60703,
+        "output_reports": 9,
+        "output_tokens": 8431
+      }
+    },
+    "snapshot": "a27703b027a81de65d387bcb59d8cc6d904c7f03",
+    "binary_sha256": "8fc6abdeb9f0a597412431947292e9b5f3c6392403ce4de4afbae24b0173f64d",
+    "coverage_disclosed": {
+      "shown": 200,
+      "total": 2306,
+      "partial": true,
+      "snapshot_skipped": []
+    },
+    "query_item_counts": [
+      1,
+      12
+    ],
+    "query_elapsed_seconds": 0.146,
+    "replay": {
+      "status": "verified",
+      "verification_scope": "integrity_linkage_and_deterministic_aggregation",
+      "validated_responses": 9,
+      "replayed_aggregates": 1,
+      "run_status": "completed_with_findings"
+    }
+  },
+  "independent_release_reviews": {
+    "flask-6145": {
+      "schema_version": "jev.independent-review/0.1",
+      "run": "release",
+      "review_type": "independent engineering review; not a human label, benchmark result, or calibration claim",
+      "no_policy_changes_or_inference": true,
+      "replay_scope": "Integrity linkage and deterministic aggregation; verified as recorded in public-release-results.json.",
+      "case": "flask-6145",
+      "pack": "packs/flask-6145-release",
+      "exit_code": 0,
+      "status": "completed",
+      "policy_outcome": "compliant",
+      "reason": null,
+      "action": "report",
+      "scoped_coverage": {
+        "expected_chunks": 2,
+        "completed_chunks": 2,
+        "unvisited": 0,
+        "reconciliation": "completed/compliant",
+        "findings": 0,
+        "conflicts": 0
+      },
+      "unit_outcomes": {
+        "chunk_compliant": 2,
+        "reconciliation_compliant": 1
+      },
+      "source_and_anchor_review": "The two scoped changes and tests match the pinned Flask source. The provider explicitly handles os.PathLike conversion, avoids treating dataclass classes as instances, and preserves the unsupported-value TypeError path. No violation finding was produced, so no action anchor was expected. Compliant/report is sensible.",
+      "honesty_and_limits": "The completed result is source-supported for this bounded policy question. It does not establish a human label or calibrated accuracy."
+    },
+    "gin-4806": {
+      "schema_version": "jev.independent-review/0.1",
+      "run": "release",
+      "review_type": "independent engineering review; not a human label, benchmark result, or calibration claim",
+      "no_policy_changes_or_inference": true,
+      "replay_scope": "Integrity linkage and deterministic aggregation; verified as recorded in public-release-results.json.",
+      "case": "gin-4806",
+      "pack": "packs/gin-4806-release",
+      "exit_code": 0,
+      "status": "completed_with_findings",
+      "policy_outcome": "uncertain",
+      "reason": "unit_uncertainty",
+      "action": "report",
+      "scoped_coverage": {
+        "expected_chunks": 5,
+        "completed_chunks": 5,
+        "unvisited": 0,
+        "reconciliation": "completed/uncertain; candidate_gap",
+        "findings": 0,
+        "conflicts": 0
+      },
+      "unit_outcomes": {
+        "chunk_compliant": 5,
+        "reconciliation_candidate_gap": 1
+      },
+      "source_and_anchor_review": "The pinned Gin diff adds QUERY through a dedicated interface, leaves IRoutes intact, and preserves Any\u2019s existing method list; regression tests cover QUERY dispatch and Any behavior. This supports the five per-chunk compliant assessments. No spurious violation finding or actionable violation anchor was produced.",
+      "controller_review": "Reconciliation had all five prior units, a full candidate menu with zero omissions, and returned need_more_evidence plus none_useful. The controller preserved uncertainty as unit_uncertainty and the human report names reconciliation candidate_gap. This is honest fail-closed behavior, though it leaves a clear additive change without an aggregate compliant result.",
+      "actionability_limit": "The report identifies the unit requiring review but does not present an actionable code location because no violation was supported. This is an outcome/actionability limit, not a source defect.",
+      "honesty_and_limits": "Uncertain does not mean the PR violates the convention. No human label or calibration claim is implied."
+    },
+    "svelte-18535": {
+      "schema_version": "jev.independent-review/0.1",
+      "run": "release",
+      "review_type": "independent engineering review; not a human label, benchmark result, or calibration claim",
+      "no_policy_changes_or_inference": true,
+      "replay_scope": "Integrity linkage and deterministic aggregation; verified as recorded in public-release-results.json.",
+      "case": "svelte-18535",
+      "pack": "packs/svelte-18535-release",
+      "exit_code": 0,
+      "status": "completed_with_findings",
+      "policy_outcome": "uncertain",
+      "reason": "unit_uncertainty",
+      "action": "report",
+      "scoped_coverage": {
+        "expected_chunks": 30,
+        "completed_chunks": 30,
+        "unvisited": 0,
+        "reconciliation": "completed/uncertain; candidate_gap",
+        "findings": 0,
+        "conflicts": 0
+      },
+      "unit_outcomes": {
+        "chunk_candidate_gap": 22,
+        "chunk_candidate_menu_incomplete": 6,
+        "chunk_model_uncertain": 2,
+        "reconciliation_candidate_gap": 1
+      },
+      "source_and_anchor_review": "The pinned Svelte source contains substantial compiler lowering, reactive source/proxy callback propagation, nested ownership handling, and array mutation batching, with runtime samples covering these behaviors. Every scoped chunk and the reconciliation completed. No violation support anchors or findings were produced, so there is no actionable violation location; the controller did not invent one.",
+      "controller_review": "Uncertainty is honest and conservative for this broad cross-file change. The 22 chunk candidate gaps, six incomplete candidate menus, two model-uncertain chunks, and reconciliation candidate gap show that evidence selection did not establish a supported violation or compliance across the whole policy scope. All scoped units were visited, and reason_version 2 reports the aggregate as unit_uncertainty instead of implying missing chunk coverage.",
+      "actionability_limit": "The policy yields no actionable finding for this large PR: all 30 chunks are uncertain and there are no supported findings. That limits review usefulness even though the run completed without operational errors.",
+      "floating_point_tie_review": {
+        "evaluation_id": "6ee4828f14542924ecc80f17",
+        "round": 0,
+        "selected_choice": "36081bc2cdf98eb1",
+        "selected_probability": 0.13999999999999999,
+        "maximum_probability": 0.14,
+        "absolute_difference": 2.7755575615628914e-17,
+        "validated": true,
+        "raw_distribution_preserved": true,
+        "assessment": "The validator accepted a floating-point tie within tolerance while preserving the original selected choice and probability distribution in the response evidence."
+      },
+      "honesty_and_limits": "The uncertain result is not a violation verdict, human label, or calibrated accuracy claim."
+    }
+  },
+  "verification": {
+    "local_suite_before_final_harness_tests": {
+      "passed": 56,
+      "skipped": 0,
+      "ripwire_enabled": true
+    },
+    "harness_tests_final": {
+      "passed": 6
+    },
+    "wheel_clean_install": {
+      "version": "0.2.0",
+      "isolated": true,
+      "controls_validated": 3,
+      "release_packs_verified": 3
+    },
+    "harness_actual_public_preparation": {
+      "cases": 3,
+      "live_inference_calls": 0
+    },
+    "credential_scan": {
+      "credential_leaks": 0
+    }
+  }
+}

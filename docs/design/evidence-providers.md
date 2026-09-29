@@ -1,6 +1,6 @@
 # Evidence providers and open-source tooling
 
-Status: design revision 0.2. Sources inspected 2026-09-28; no tool was installed or benchmarked. Pin exact versions/checksums and licenses after the feasibility test.
+Status: design revision 0.2. Ripwire 0.6.5 is pinned by binary digest and exercised by executable Java fixtures plus caller/callee queries on a public Go PR. Graph completeness and recall remain unmeasured; see [implementation status](../implementation-status.md).
 
 ## Selection
 

@@ -2,7 +2,7 @@
 
 Jev CI evaluates **committed source-branch changes** against a protected target with bounded YAML policies. It resolves both refs to commits, compares the source to their merge base, divides the complete patch into capped chunks, asks [TypeSafe Jev](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe) typed questions through Vercel AI Gateway, and writes an inspectable Evidence Pack. It never builds or executes candidate code.
 
-The package is an implementation of the [revision 0.2 design](docs/design/README.md). It is suitable for mechanism testing and calibration; the illustrative policy is **not calibrated for a release gate**. No live Gateway call, human policy validation, or 30-story experiment has been performed in this repository.
+The package implements the [revision 0.2 design](docs/design/README.md), with a live Gateway integration and real-world engineering validation on public Flask, Gin, and Svelte pull requests. See the [validation report](docs/validation/public-prs-2026-09-30.md) for exact commits, policies, outcomes, cost, and limitations. The included policies are **report-only and uncalibrated**; human-labelled accuracy validation and the separate 30-story experiment remain future work.
 
 ## Install
 
@@ -42,7 +42,7 @@ chmod 600 .env.local
 .venv/bin/jev-ci replay --pack /tmp/jev-pack --mode protocol
 ```
 
-Use a new `--output` path for each run. `--source` defaults to `HEAD`; `--target` defaults to the local `refs/heads/main`. The tool itself never fetches, so ensure both refs exist locally. For reproducible CI runs, pass commit IDs instead of moving branch names. Exit codes are 0 for an allowed result, 1 for a configured block, and 2 for an operational error. `--format json` gives a versioned machine-readable summary.
+Use a new `--output` path for each run. `--source` defaults to `HEAD`; `--target` defaults to the local `refs/heads/main`. The tool itself never fetches, so ensure both refs exist locally. For reproducible CI runs, pass commit IDs instead of moving branch names. Exit codes are 0 for an allowed result, 1 for a configured block, and 2 for an operational error. `--format json` gives a versioned machine-readable summary. Each pack also contains `report.md` with policy outcomes, source anchors for findings, uncertainty diagnostics, and reported usage/cost. Feedback text is authored by the policy, and missing evidence remains visible even when the CI action allows the run.
 
 The [GitHub Actions example](examples/github/jev-ci.yml) checks out the target history, explicitly fetches the pull request head (including a fork's head ref), and checks out protected controls and a pinned tool revision separately. Copy it into your application's `.github/workflows/`, replace `PINNED_TOOL_COMMIT_SHA` with a reviewed commit from this repository, and create an `AI_GATEWAY_API_KEY` repository secret. It uploads the Evidence Pack even when evaluation fails. GitHub does not expose repository secrets to `pull_request` workflows triggered by forks, so those runs need an approved credential strategy before they can call the Gateway. The package's own [CI job](.github/workflows/ci.yml) runs lint, unit tests, and the pinned Ripwire fixture.
 
@@ -50,7 +50,7 @@ The [GitHub Actions example](examples/github/jev-ci.yml) checks out the target h
 
 Root configuration is JSON; policies are YAML files discovered recursively under the supplied folder. Documents are bound to hashes in the trusted control directory. The CLI never reads policy settings from the candidate branch by default. A policy can narrow root limits but cannot select arbitrary commands or file paths. Its `scope` selects changed files; its authored terms and permitted requests shape a bounded request menu. Jev chooses menu IDs and support IDs; the controller executes only its own validated requests. Feedback prose comes from policy templates and is labelled accordingly.
 
-The initial provider supports exact committed file, literal search, diff chunk, and trusted document evidence. Ripwire 0.6.5 is optional: when enabled with a pinned binary SHA-256, it indexes a temporary snapshot materialized directly from the **source commit's blobs** and offers JSON callers/callees queries. Its graph results are labelled heuristic and partial, including upstream ambiguity and floor counts. Other semantic verbs remain unsupported until fixture validation. [Provider details](docs/design/evidence-providers.md) explain the limits.
+The initial provider supports exact committed file, literal search, diff chunk, and trusted document evidence. Ripwire 0.6.5 is optional: when enabled with a pinned binary SHA-256, it indexes a temporary snapshot materialized directly from the **source commit's blobs** and offers JSON callers/callees queries. Its graph results are labelled heuristic and partial, including upstream ambiguity and floor counts. Snapshot materialization and exact searches read committed blobs in batches, with byte caps and a shared run deadline; skipped files and bounded search excerpts are disclosed. Other semantic verbs remain unsupported until fixture validation. [Provider details](docs/design/evidence-providers.md) explain the limits.
 
 To enable it, replace the demo config's `providers` section with a trusted binary path and its actual checksum:
 
@@ -69,9 +69,19 @@ To enable it, replace the demo config's `providers` section with a trusted binar
 }
 ```
 
-The diff module owns chunk size, byte ranges, reconstruction, and chunk IDs. It reports a whole-diff limit or chunk-count failure as incomplete; no clipped prefix is treated as complete. Every applicable chunk is scheduled, followed by required policy reconciliation. The pack retains frozen inputs, source evidence, typed responses, ordered events, results, feedback, and checksums. Protocol replay verifies the saved responses, aggregates, and CI mapping without network access. Aggregate confidence is intentionally null; unit scores remain available.
+The diff module owns chunk size, byte ranges, reconstruction, and chunk IDs. It reports a whole-diff limit or chunk-count failure as incomplete; no clipped prefix is treated as complete. Every applicable chunk is scheduled, followed by required policy reconciliation. The pack retains frozen inputs, source evidence, typed responses, ordered events, results, feedback, and checksums. Protocol replay checks checksums, typed answers, ordered request/response/result links, unit diagnostics, deterministic aggregates, and CI mapping without network access. It does not re-execute every controller transition, retrieval operation, or model inference, and checksums alone cannot authenticate an archive that was wholly replaced. Aggregate confidence is intentionally null; unit scores remain available.
 
-`AI_GATEWAY_API_KEY` comes from the process environment or an explicitly named dotenv file; the process environment wins. The key is never logged or stored in the pack. The Gateway adapter uses the native `typesafe-ai/jev` endpoint, bounded request/response bytes and deadline, and at most one retry on HTTP 503. The protocol conservatively bounds input tokens by UTF-8 request bytes; actual Gateway token usage is preserved when returned. Provider and model aliases can still limit reproducibility, so record the exact tool, policy, and control revisions in a real study.
+`AI_GATEWAY_API_KEY` comes from the process environment or an explicitly named dotenv file; the process environment wins. The key is never logged or stored in the pack. The Gateway adapter uses the native `typesafe-ai/jev` endpoint, bounded request/response bytes and deadline, and at most one retry on HTTP 503. The protocol conservatively bounds input tokens by UTF-8 request bytes; actual Gateway token usage and decimal USD cost are preserved when returned. Unknown or failed-call billing remains unknown. Routing metadata is retained and another evaluator identity is rejected. Provider and model aliases can still limit reproducibility, so record the exact tool, policy, and control revisions in a real study.
+
+## Reproduce the public PR checks
+
+The [validation harness](validation/public_prs/README.md) includes frozen public commit IDs, independent policies, and hash-bound conventions. Prepare the source without live calls, then optionally evaluate it using your Gateway key:
+
+```sh
+.venv/bin/python validation/public_prs/run.py --help
+```
+
+The report documents initial adverse outcomes and the final run; completing a run is distinct from proving policy accuracy.
 
 ## Development
 

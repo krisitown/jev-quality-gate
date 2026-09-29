@@ -1,6 +1,6 @@
 # Jev through Vercel AI Gateway
 
-Status: design revision 0.2. Transport selected by the user and checked against existing watchdog/exploration code by GPT-6 Luna. No network evaluation has been run for this project.
+Status: design revision 0.2. Transport selected by the user and checked against existing watchdog/exploration code by GPT-6 Luna. Live synthetic and public-PR evaluations have now exercised this transport; see the [validation report](../validation/public-prs-2026-09-30.md).
 
 ## Selected integration
 
@@ -50,7 +50,7 @@ Do not opt into model fallback or virtual-model routing. Record and check return
 
 Public configuration refers only to `AI_GATEWAY_API_KEY`. CI injects it using its secret store. Local use can explicitly opt into an ignored dotenv file with `--env-file`; environment values take precedence and only configured credential variables are read. The implemented loader uses a dotenv library, never shell-sources the file. No implicit loading from a candidate repository.
 
-The research workspace may provision an ignored `.env.local` with mode 0600 from the user-authorized existing credential source. It is not part of the tool distribution, policy repository, Evidence Pack, or public example set. Presence of a key does not establish validity; no request has been made to check it. Source paths and code audit references belong in the parent research record, not in this portable adapter.
+The research workspace may provision an ignored `.env.local` with mode 0600 from the user-authorized existing credential source. It is not part of the tool distribution, policy repository, Evidence Pack, or public example set. Live requests verified this workspace's entitlement during engineering validation; that does not guarantee future key validity or availability. Source paths and code audit references belong in the parent research record, not in this portable adapter.
 
 ## Validation before formal use
 

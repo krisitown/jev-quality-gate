@@ -5,24 +5,36 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
 from pathlib import Path
 from typing import Any
 
 from .errors import ComparisonError
-from .git import Comparison, _git
+from .git import Comparison, iter_tree_blobs
 from .process import run_bounded
 from .util import digest
 
 
 class RipwireProvider:
-    def __init__(self, comparison: Comparison, settings: dict):
+    def __init__(
+        self, comparison: Comparison, settings: dict, *, deadline: float | None = None
+    ):
         self.comparison = comparison
         self.settings = settings
+        self.deadline = deadline
         self._temp: tempfile.TemporaryDirectory | None = None
         self.root: Path | None = None
         self.map: dict[str, Any] | None = None
         self.last_raw: bytes = b""
         self.snapshot_skipped: list[str] = []
+
+    def _timeout(self) -> float:
+        timeout = self.settings["timeout_seconds"]
+        if self.deadline is not None:
+            timeout = min(timeout, self.deadline - time.monotonic())
+        if timeout <= 0:
+            raise TimeoutError("Ripwire deadline expired")
+        return timeout
 
     def describe(self) -> dict:
         return {
@@ -44,7 +56,7 @@ class RipwireProvider:
             version = run_bounded(
                 [self.settings["binary"], "--version"],
                 max_output_bytes=2048,
-                timeout_seconds=self.settings["timeout_seconds"],
+                timeout_seconds=self._timeout(),
             )
             if (
                 version.returncode
@@ -84,48 +96,28 @@ class RipwireProvider:
     def _materialize_snapshot(self) -> None:
         """Read committed blobs directly; Git archive export-ignore may hide candidate files."""
         assert self.root is not None
-        listing = _git(
+        stats: dict = {}
+        for path, _blob, content in iter_tree_blobs(
             self.comparison.repo,
-            "ls-tree",
-            "-r",
-            "-z",
             self.comparison.source,
-            max_bytes=16 * 1024 * 1024,
-        )
-        total = 0
-        for record in listing.split(b"\0"):
-            if not record:
-                continue
-            try:
-                metadata, raw_path = record.split(b"\t", 1)
-                mode, kind, blob = metadata.decode("ascii").split()
-                path = raw_path.decode("utf-8")
-            except (ValueError, UnicodeError) as exc:
-                raise ComparisonError(
-                    "Git snapshot has undecodable tree entry"
-                ) from exc
+            max_file_bytes=self.settings["max_snapshot_bytes"],
+            max_total_bytes=self.settings["max_snapshot_bytes"],
+            deadline=self.deadline,
+            stats=stats,
+        ):
+            if self.deadline is not None and time.monotonic() >= self.deadline:
+                raise TimeoutError("Ripwire snapshot deadline expired")
             relative = Path(path)
-            if (
-                relative.is_absolute()
-                or ".." in relative.parts
-                or "\\" in path
-                or not relative.parts
-            ):
-                raise ComparisonError("Git snapshot has unsafe path")
-            if mode not in ("100644", "100755") or kind != "blob":
-                self.snapshot_skipped.append(path)
-                continue
-            size = int(_git(self.comparison.repo, "cat-file", "-s", blob, max_bytes=64))
-            total += size
-            if total > self.settings["max_snapshot_bytes"]:
-                raise ComparisonError("Ripwire snapshot bytes exceed cap")
             destination = self.root / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             if not destination.resolve().is_relative_to(self.root):
                 raise ComparisonError("Git snapshot path escapes temporary root")
-            destination.write_bytes(
-                _git(self.comparison.repo, "cat-file", "blob", blob, max_bytes=size)
-            )
+            destination.write_bytes(content)
+        if self.deadline is not None and time.monotonic() >= self.deadline:
+            raise TimeoutError("Ripwire snapshot deadline expired")
+        self.snapshot_skipped = stats["skipped_paths"]
+        if stats["limit_reason"]:
+            raise ComparisonError("Ripwire snapshot bytes exceed cap")
 
     def __exit__(self, *_):
         if self._temp:
@@ -146,7 +138,7 @@ class RipwireProvider:
                 cwd=self.root,
                 env=env,
                 max_output_bytes=self.settings["max_output_bytes"],
-                timeout_seconds=self.settings["timeout_seconds"],
+                timeout_seconds=self._timeout(),
             )
             if process.output_exceeded:
                 raise ComparisonError("Ripwire output exceeds cap")

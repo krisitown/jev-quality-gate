@@ -20,6 +20,7 @@ from .inference import Gateway
 from .policy import load_policies
 from .providers import RipwireProvider
 from .protocol import run_unit
+from .reporting import render_markdown
 from .trace import Pack
 from .util import canonical, digest
 
@@ -82,6 +83,7 @@ def evaluate(
     }
     try:
         config = load_config(config_path)
+        deadline = time.monotonic() + config.limits["max_seconds"]
         policy_pack = load_policies(policy_path(config, policies_path), config)
         trace.write(
             "manifest.json",
@@ -104,7 +106,9 @@ def evaluate(
         for policy in policy_pack.policies:
             trace.blob(policy.raw)
         trace.write("policies/manifest.json", policy_pack.manifest)
-        change = compare(repo, source, target, config.diff["max_total_diff_bytes"])
+        change = compare(
+            repo, source, target, config.diff["max_total_diff_bytes"], deadline=deadline
+        )
         trace.event("comparison_resolved", change.descriptor())
         trace.blob(change.raw_diff)
         chunks = chunk_diff(change, config.diff)
@@ -184,20 +188,22 @@ def evaluate(
             Gateway(config.inference, key, transport=transport) if active else None
         )
         provider_ctx = (
-            RipwireProvider(change, config.data["providers"]["ripwire"])
+            RipwireProvider(
+                change, config.data["providers"]["ripwire"], deadline=deadline
+            )
             if active and "ripwire" in config.data["providers"]["enabled"]
             else nullcontext(None)
         )
         budget = {
             "remaining": config.limits["max_calls"],
             "reserved": minimum - 1,
-            "deadline": time.monotonic() + config.limits["max_seconds"],
+            "deadline": deadline,
             "native_usage": {
                 "input_tokens": 0,
                 "output_tokens": 0,
                 "input_reports": 0,
                 "output_reports": 0,
-                "cost_usd": 0.0,
+                "cost_usd": "0",
                 "cost_reports": 0,
             },
         }
@@ -219,10 +225,15 @@ def evaluate(
                 for policy in policy_pack.policies:
                     if chunk not in schedule[policy.id] or not active:
                         continue
-                    if fatal:
+                    if fatal or time.monotonic() >= deadline:
                         trace.event(
                             "unit_skipped",
-                            {"kind": "chunk", "reason": "operational_error"},
+                            {
+                                "kind": "chunk",
+                                "reason": "operational_error"
+                                if fatal
+                                else "run_deadline",
+                            },
                             policy_id=policy.id,
                             chunk_id=chunk.id,
                         )
@@ -276,6 +287,9 @@ def evaluate(
                         if reason != "run_call_budget":
                             errors.append(str(exc)[:200])
                             fatal = True
+                    if result.get("operational_error"):
+                        errors.append(result["operational_error"])
+                        fatal = True
                     results[policy.id].append(result)
                     trace.write(f"evaluations/{result['id']}/result.json", result)
                     budget["reserved"] = max(0, budget["reserved"] - 1)
@@ -286,10 +300,13 @@ def evaluate(
                     or policy.data["aggregation"]["mode"] != "requires_reconciliation"
                 ):
                     continue
-                if fatal:
+                if fatal or time.monotonic() >= deadline:
                     trace.event(
                         "unit_skipped",
-                        {"kind": "reconciliation", "reason": "operational_error"},
+                        {
+                            "kind": "reconciliation",
+                            "reason": "operational_error" if fatal else "run_deadline",
+                        },
                         policy_id=policy.id,
                     )
                     continue
@@ -345,6 +362,9 @@ def evaluate(
                     if reason != "run_call_budget":
                         errors.append(str(exc)[:200])
                         fatal = True
+                if reconciliation.get("operational_error"):
+                    errors.append(reconciliation["operational_error"])
+                    fatal = True
                 reconciliations[policy.id] = reconciliation
                 trace.write(
                     f"evaluations/{reconciliation['id']}/result.json", reconciliation
@@ -413,6 +433,27 @@ def evaluate(
             policies=aggregates,
             errors=errors,
             comparison=change.descriptor(),
+            diagnostics=[
+                {
+                    "policy_id": policy.id,
+                    "unit_id": unit["id"],
+                    "unit_kind": unit["unit_kind"],
+                    "chunk_id": unit["chunk_id"],
+                    "outcome": unit["outcome"],
+                    "reason": unit["reason"],
+                    "calls": unit["calls"],
+                }
+                for policy in policy_pack.policies
+                for unit in [
+                    *results[policy.id],
+                    *(
+                        [reconciliations[policy.id]]
+                        if policy.id in reconciliations
+                        else []
+                    ),
+                ]
+                if unit["outcome"] != "compliant"
+            ],
             coverage={
                 "chunk_status": chunks.status,
                 "chunk_reason": chunks.reason,
@@ -436,5 +477,6 @@ def evaluate(
     except (JevCIError, ValueError, OSError) as exc:
         summary["errors"].append(str(exc)[:300])
         trace.event("run_error", {"error": str(exc)[:300]})
+    trace.write_text("report.md", render_markdown(summary))
     trace.finish(summary)
     return summary
