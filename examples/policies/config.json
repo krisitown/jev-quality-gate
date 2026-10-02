@@ -2,16 +2,16 @@
   "schema_version": "jev.config/0.2",
   "mode": "calibration",
   "control_bundle": {
-    "id": "illustrative-demo",
+    "id": "exploratory-responsibility-policies",
     "root": ".",
-    "revision": "0.1"
+    "revision": "0.1.0-exploratory"
   },
   "document_bindings": [
     {
-      "id": "architecture",
-      "path": "architecture.md",
-      "sha256": "217b7c3106a0f868ccf9a63e1191b057ede10c5d804bd87e444451bc47ffe897",
-      "authority": "trusted"
+      "authority": "trusted",
+      "id": "conventions",
+      "path": "conventions.md",
+      "sha256": "d418aca8853890ba9219a1ae09d5832c56d5d8043f793c37154ded5a11e7985d"
     }
   ],
   "inference": {
@@ -24,7 +24,11 @@
     "max_response_bytes": 100000,
     "max_questions": 8
   },
-  "providers": {"enabled": ["git-exact"]},
+  "providers": {
+    "enabled": [
+      "git-exact"
+    ]
+  },
   "diff": {
     "strategy": "bounded-sequential-v1",
     "max_chunk_bytes": 12000,
@@ -38,11 +42,14 @@
     "max_calls": 40,
     "max_seconds": 900,
     "max_rounds": 1000000,
-    "max_candidates": 12,
+    "max_candidates": 32,
     "max_evidence_bytes": 80000,
     "max_search_results": 20,
-    "max_input_bytes": 100000
+    "max_input_bytes": 150000
   },
-  "ci": {"incomplete": "report", "operational_error": "error"},
-  "policy_dir": "policies"
+  "ci": {
+    "incomplete": "report",
+    "operational_error": "error"
+  },
+  "policy_dir": "."
 }

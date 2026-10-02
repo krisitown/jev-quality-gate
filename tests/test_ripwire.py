@@ -126,7 +126,7 @@ def test_ripwire_evidence_is_offered_and_delivered(project, tmp_path, monkeypatc
                 if x.get("type") == "GET_CALLERS"
             )
         answers = {
-            name: answer(question, selected.get(name, "none_useful"))
+            name: answer(question, selected.get(name, next(iter(question["criteria"]))))
             for name, question in questions.items()
         }
         return httpx.Response(200, json={"answers": answers})

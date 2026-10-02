@@ -84,3 +84,7 @@ The future basic example set will be versioned in `jev-ci/examples/policies/`, w
 ## Outcome semantics
 
 Apply a policy to every applicable chunk, then use [aggregation](diff-chunking.md). Missing or ambiguous evidence cannot establish compliance. A bounded supported violation can coexist with partial overall coverage. No unsuccessful search alone proves an abstraction or duplicate is absent. Human-labelled validation must test cross-file interactions, candidate-menu omissions, and exceptions.
+
+## v0.3 compatibility
+
+Policy questions, scope, exceptions, feedback, disposition/support thresholds and schema identity remain unchanged. Root `limits.max_rounds` and `limits.max_input_bytes` now own the loop count and full serialized-input cap. Policy `max_rounds`, `max_input_tokens`, `max_requests_per_round`, and `request_selection_min` are retained as legacy metadata and do not govern acquisition. `max_evidence_bytes` still narrows individual retrieval size. `next_request` offers only real candidates; every unresolved assessment acquires exactly the top-ranked candidate, regardless of its request probability. A compliant or supported violation meeting its configured threshold ends the unit before retrieval.

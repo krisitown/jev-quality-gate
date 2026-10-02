@@ -91,6 +91,7 @@ def evaluate(
                 "schema_version": "jev.pack/0.2",
                 "run_id": trace.run_id,
                 "tool_version": __version__,
+                "protocol_version": "jev.protocol/0.3",
                 "config_sha256": config.hash,
                 "policy_pack_sha256": policy_pack.manifest["sha256"],
                 "mode": config.mode,

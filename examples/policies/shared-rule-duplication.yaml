@@ -1,0 +1,84 @@
+schema_version: jev.policy/0.2
+id: shared-rule-duplication
+version: 0.1.0-exploratory
+statement: Separate implementations of the same business decision should use one authoritative or explicitly coordinated rule unless evidence justifies distinct behavior.
+question: Does this change introduce or worsen separate implementations of the same business decision without a justified need for distinct behavior?
+scope:
+  include:
+    - "*.py"
+    - "*.go"
+    - "*.js"
+    - "*.gjs"
+    - "*.jsx"
+    - "*.mjs"
+    - "*.cjs"
+    - "*.ts"
+    - "*.gts"
+    - "*.tsx"
+    - "*.html"
+    - "*.haml"
+    - "*.erb"
+    - "*.tmpl"
+    - "*.graphql"
+    - "*.java"
+    - "*.kt"
+    - "*.rs"
+    - "*.rb"
+    - "*.php"
+    - "*.cs"
+    - "*.c"
+    - "*.h"
+    - "*.cc"
+    - "*.cpp"
+    - "*.swift"
+    - "*.scala"
+    - "*.sql"
+    - "*.vue"
+    - "*.svelte"
+  exclude:
+    - "vendor/**"
+    - "**/vendor/**"
+    - "node_modules/**"
+    - "**/node_modules/**"
+    - "generated/**"
+    - "**/generated/**"
+  change_kind: introduced_or_worsened
+interpretation:
+  definitions:
+    - The bound conventions define a business rule by its intended decision, applicability, and purpose, even if separate implementations currently diverge.
+    - For example, two changed paths deciding whether the same account may perform the same operation can be duplicate implementations even when one now has a different condition.
+    - Similar names, syntax, or a literal search match alone do not establish that two paths implement the same decision.
+  exceptions:
+    - Separate rules are permitted when their contexts require different behavior or a stable contract assigns distinct meanings, with evidence for that distinction.
+    - An explicitly coordinated shared rule may have multiple adapters or representations when the evidence shows they defer to the same decision.
+    - Test expectations or reference algorithms can express a production rule separately to check it; they do not count as independently maintained production implementations by themselves. Generated or vendored code is excluded from this comparison unless evidence shows it is independently maintained here.
+  ambiguity:
+    - Available evidence does not establish shared intended decision, applicability, purpose, the relevant base behavior, or a claimed reason for distinct rules.
+    - Search or provider results are absent, capped, omitted from the candidate menu, or incomplete, so equivalence or its absence cannot be established.
+outcomes: [compliant, violation, uncertain]
+documents: [conventions]
+aggregation:
+  mode: requires_reconciliation
+discovery:
+  search_terms: [validate, authorize, permission, eligible, policy, decision]
+evidence:
+  allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES]
+  max_rounds: 3
+  max_requests_per_round: 3
+  max_input_tokens: 150000
+  max_evidence_bytes: 80000
+confidence:
+  metric: selected_probability
+  compliant_min: null
+  violation_min: null
+  request_selection_min: null
+  support_min: null
+  calibration_id: null
+feedback:
+  violation: Review the changed decision path and the cited implementations for materially equivalent business rules that now diverge or are maintained separately without an evidenced need.
+  repair_guidance: Identify the shared decision and its justified variants from source and contracts; consolidate or coordinate equivalent rules while preserving behavior that evidence shows is intentionally distinct.
+ci:
+  severity: warning
+  compliant: report
+  violation: report
+  uncertain: report

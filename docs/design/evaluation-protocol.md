@@ -1,55 +1,47 @@
 # Adaptive evaluation protocol
 
-Status: design revision 0.2, `jev.protocol/0.2`. This replaces the earlier assumption that Jev generates arbitrary JSON, explanations, or tool calls. Jev supplies typed choices/scores; the controller constructs requests and normalized records. See [Gateway integration](gateway-integration.md).
+Status: controller revision0.3, `jev.protocol/0.3`. Config and policy schemas remain at0.2 for compatibility. Jev answers typed questions; the controller constructs requests, state, feedback and normalized results. [Gateway integration](gateway-integration.md) describes the native transport.
 
-## Unit of work and normalized states
+## Unit and questions
 
-A unit evaluates one policy against one diff chunk, or performs that policy's required reconciliation. Each has an independent context, `evaluation_id`, `policy_id`, `unit_kind` (chunk/reconciliation), `chunk_id` (null for reconciliation), and `round`. A provider response is recorded unchanged, then normalized into one of three controller states:
+Each isolated session evaluates one policy against one diff chunk, or performs that policy's reconciliation. State contains policy meaning, trusted conventions, delivered source, prior assessment summaries when reconciling, a bounded request menu, and the round number. A one-chunk reconciliation carries the source directly. Multi-chunk reconciliation offers source through its menu; it does not automatically inherit all previously retrieved context.
 
-| State | Meaning |
-| --- | --- |
-| `DECISION_READY` | A typed compliant/violation selection claims enough evidence; acceptance still requires thresholds, coverage, and support |
-| `NEED_MORE_EVIDENCE` | A missing fact could be resolved by a selected allowed candidate request/bundle |
-| `ABSTAIN` | Policy ambiguity, no useful available evidence path, exhausted resources, or unresolved uncertainty |
+Each call batches three typed questions:
 
-The framework's primary `disposition` choice has five fixed categories: `compliant`, `violation`, `need_more_evidence`, `policy_ambiguous`, and `uncertain`. Descriptions distinguish insufficient source facts from a convention that cannot establish an answer. These are protocol choices around the same bounded policy question, not new architecture policies.
+- `disposition`: compliant, violation, need_more_evidence, policy_ambiguous, or uncertain.
+- `next_request`: the highest-ranked real candidate ID, present only when the menu is nonempty. There is no `none_useful` choice. This answer is ignored when an accepted verdict already finishes the unit.
+- `support`: a delivered source-evidence ID, or `none`. Empty retrievals and documents without source anchors cannot support a violation.
 
-## Candidate-driven context acquisition
+The policy supplies one bounded judgment and authored feedback. Source/comments are data, not instructions. Answers must have the requested IDs/types, valid probability keys and ranges, and a selected maximum-probability choice. Invalid responses are operational errors. The adapter preserves raw responses and native usage.
 
-`context.py` constructs a bounded menu of concrete authorized requests using changed paths/symbols, provider-reported relationships, known evidence IDs, related chunk IDs, and policy-authored literal search terms. It gathers candidate locations only; it does not decide compliance. It uses existing provider metadata and no custom language parser.
+## Menus and retrieval
 
-Each menu entry has a stable candidate ID, missing-fact description, expected resource limits, and 1–3 fully instantiated typed requests. Jev selects an ID via a `next_request` choice that also offers `none_useful`. The controller maps that ID back to the immutable request objects. It never executes model-authored paths, code, shell commands, or provider flags. No generative discovery model is introduced in v0.
+The controller constructs concrete requests from changed paths, other applicable diff chunks, policy-authored literal search terms, trusted documents, and optional provider relationships. It maps stable candidate IDs back to its own immutable request objects; model-authored paths, commands and provider flags are never executed.
 
-The menu is bounded (proposed maximum 12 entries), deterministically ordered and hashed. The implemented ordering is versioned as `current-file-then-category-round-robin-v1`: current-chunk files first, then one candidate at a time from authored searches, symbol relationships, other applicable chunks, remaining changed files, and documents. Large file or symbol inventories cannot monopolize all menu slots. Within a category, source inventory order remains deterministic. Omissions still prevent unsupported compliance. Record candidates excluded by count/scope/capability. A missing candidate is a limitation, not evidence that the fact does not exist. If no shown option is useful, return `uncertain: candidate_gap`; calibration will determine whether paging or a richer discovery adapter is necessary. Candidate-menu recall is a separate metric.
+The configurable `limits.max_candidates` cap remains32 in the experiment and exploratory example. Ordering is `current-file-then-category-round-robin-v1`: current-chunk files first, then category-interleaved searches, relationships, chunks, other files and documents. Menus and omission counts are hashed/traced. Omitted requests are undisplayed possibilities, not proof of a missing necessary fact, and do not automatically veto a compliant verdict.
 
-The first request can batch disposition, next-request selection, and bounded supporting-evidence questions against the same state. Selection questions name framework-owned IDs and always allow no useful support. Native `noul` (boolean-probability) support questions apply to already delivered excerpt IDs, not unseen code. A sufficiently selected useful request takes precedence over a proposed compliant/violation/uncertain conclusion, so missing evidence is acquired before accepting that conclusion. Policy ambiguity is terminal. Preserve all raw answers for analysis.
+On continuation, fulfill exactly the chosen top-ranked request. Mark its ID used, record its result, rebuild the menu without used IDs, and reassess. Empty, denied, unsupported or partial-without-items results remain visible in state and trace; the controller tries the remaining candidates rather than stopping on the first unsuccessful retrieval. Candidate exhaustion ends as uncertainty. Searches still return bounded authored-literal excerpts; they do not discover arbitrary unchanged dependencies. Optional Ripwire relationships remain heuristic.
 
 ## Transitions
 
-1. Durably start a minimal run record, validate inputs, and snapshot policy/diff manifests. No applicable changes yields not_applicable without inference. Unrepresentable relevant changes create explicit uncertainty.
-2. For each scheduled unit, build state from policy, trusted conventions, one chunk (or reconciliation index), delivered evidence, and candidate descriptions. Count serialized input; include protocol questions and criteria in resource accounting.
-3. Call Jev through the configured Gateway adapter. Require all requested question IDs, permitted types, valid choices, numeric ranges, and valid probability mappings. Unknown choices, missing fields, or malformed responses are operational errors, subject to a single bounded transport retry where appropriate.
-4. Accept ready/compliant only above its calibrated threshold and with complete known unit scope; require accepted reconciliation for branch-level compliance when configured. A ready/violation needs calibrated support selection anchored in actual evidence. Without support, retrieve feasible missing context or abstain; do not fabricate a rationale.
-5. For missing evidence or a below-threshold ready answer, use a sufficiently supported `next_request` selection from that same response. Check authorization and all budgets before fulfillment. Append returned facts/statuses, then ask the same bounded question again. Confidence alone does not justify another call over unchanged evidence.
-6. A policy-ambiguous answer ends the unit immediately. No useful candidate, repeated no-progress requests, unresolved conflicting answers, or exceeded limits produce uncertainty. Unknown/unsupported retrieval is evidence insufficiency; systemic provider failures remain errors.
-7. Persist unit results, iterate all scheduled chunks, perform required reconciliation, and aggregate using [the chunking contract](diff-chunking.md). A detected violation does not hide unvisited units.
+1. Start a durable trace, validate trusted controls, pin the Git comparison, chunk the complete patch and schedule all applicable units plus required reconciliation.
+2. Build the full request from current state, menu and questions. Before every Gateway call, check the complete canonical UTF-8 byte size, count, run calls and deadline. An over-limit request is never sent.
+3. Accept compliant when its configured disposition threshold is satisfied and relevant content is representable. Accept violation when its threshold and support threshold are satisfied and the selected evidence has actual source anchors. Terminal verdicts take precedence over the speculative request selection from that same response.
+4. If no accepted verdict exists—including uncertain/ambiguous dispositions, below-threshold decisions or unsupported violation proposals—acquire exactly the top remaining real request. Request-confidence thresholds do not suppress acquisition.
+5. Preserve returned content/statuses and assemble the next request. If the added content makes that request exceed its byte ceiling, stop as `input_byte_limit` before another call, preserving the fetched evidence in the trace. Do not clip it or silently summarize it.
+6. Stop unresolved work as `round_limit` at the configured count, or `candidate_exhausted` when no candidates remain. Operational errors, whole-run deadline and call limits retain explicit reasons. Unsupported relevant content cannot be made compliant by the loop.
+7. Persist results, visit the remaining scheduled units, reconcile and aggregate. Conflicting assessments and unvisited/uncertain units remain visible through the existing aggregation contract.
 
-## Feedback and evidence
+## Count and content controls
 
-A normalized finding contains policy/version, chunk and source anchors, selected evidence IDs and support scores, decision scores, and authored message/repair guidance. `explanation_origin` is `policy_template`; it is never labelled a generated Jev explanation. Localization can be `chunk`, `hunk`, or `source_range`, based on what was actually selected. Human verification still determines whether these excerpts support the claim. Multiple actual defects inside one coarse finding are resolved in audited issue matching, not invented by the controller.
+`limits.max_rounds` is the sole configurable follow-up count ceiling. The initial call is round0; a value of1 permits one acquisition and a second decision. Example configs use1,000,000 as a practically unbounded count. A finite candidate inventory and input cap normally end unresolved sessions sooner.
 
-For abstention, record a reason code and template describing missing evidence, candidate gaps, or policy ambiguity. The controller owns these messages. Qwen repairs from the policy question, supplied evidence, and authored guidance; whether that is actionable enough is an explicit calibration requirement.
+`limits.max_input_bytes` limits each full serialized request, including trusted policy, documents, evidence, menu and question criteria. `inference.max_request_bytes` remains an additional adapter transport ceiling. `max_evidence_bytes` caps individual retrievals, narrowed by policy; it no longer caps the cumulative delivered packet. Whole-run calls/deadline and provider output/search/diff caps remain operational protections.
 
-## Budgets and confidence
+Policy `evidence.max_rounds`, `evidence.max_input_tokens`, `evidence.max_requests_per_round` and `confidence.request_selection_min` remain loadable legacy metadata. They no longer govern loop count, serialized input size or acquisition selection. One request is always fetched per continuation. Disposition/support thresholds still apply in gate mode; calibration can leave them null. No exact vendor tokenizer is implemented, and byte limits must not be advertised as token counts. Record actual Gateway usage independently.
 
-Proposed per-unit ceilings: 3 acquisition rounds, 3 requests/round, 5 Gateway calls including retries, 20,000 input tokens/call when countable, 100,000 cumulative input tokens, 80,000 unique evidence bytes, 20 search results/request, 16,000 bytes/provider response, 15 seconds/request, and 120 seconds/unit. Candidate/support question counts and serialized request bytes are also bounded. Chunk retrieval additionally obeys the central diff cap.
+## Findings and replay
 
-One initial call and up to three post-retrieval calls normally fit; reserve room for one permitted transport retry. Typed evaluation does not accept chat generation parameters by assumption. Output limits and tokenizer availability must match the actual adapter capabilities: hard byte, question, call, and time limits always apply, while unavailable exact token enforcement is disclosed. Formal gate use requires a documented, validated tokenizer/conservative upper-bound strategy or server limit; an estimate cannot be advertised as exact. Record returned usage independently of any local estimates.
+Findings retain policy/version, selected evidence, source anchors, decision/support scores and authored message/repair guidance. `explanation_origin` is `policy_template`; Jev does not generate an explanation. Human adjudication and repair validation are needed to establish whether the cited evidence supports the claim and the feedback is useful.
 
-Run-level limits cover all units and reconciliation, not one policy alone. The coordinator reserves remaining initial-unit/reconciliation budgets before extra rounds. Exhaustion marks remaining units uncertain with reason and counts. No implicit fallback to another model, unbounded retries, or summaries that erase missing evidence.
-
-Calibrate selected-category probability, raw provider confidence, request selection, and support scores separately. Do not substitute one for another or assume universal probability calibration. A model alias without an immutable version is a disclosed reproducibility limitation.
-
-## Results
-
-A unit result includes schema/version, IDs, state/outcome/reason, typed answer scores and raw response reference, evidence/support selections, coverage/gaps, used budgets, timings, and trace reference. A policy aggregate includes constituent unit IDs, deduplicated findings, completed/uncertain/error/unvisited counts, reconciliation result, execution health, and CI action. Aggregate confidence is null; per-unit scores remain available. Systemic errors override CI success/block status while preserving completed judgments. Calibration runs retain provisional selections and cannot act as release gates.
+The pack records tool/protocol version, immutable controls and comparison, menus, all returned evidence, sent request/response blobs, unit outcomes, budgets, reported billing and checksums. Replay checks integrity, typed responses, ordered request/response/result linkage, diagnostics, deterministic aggregation and CI mapping. It does not re-run inference or every controller/retrieval transition. Historical packs retain their original saved questions and remain replayable. Alias/server reproducibility and unavailable billing remain disclosed.

@@ -49,7 +49,7 @@ def test_branch_evaluation_adapts_reconciles_and_replays(
                 x for x in state["delivered_evidence"] if x != state["chunk_id"]
             )
         answers = {
-            name: answer(question, selected.get(name, "none_useful"))
+            name: answer(question, selected.get(name, next(iter(question["criteria"]))))
             for name, question in questions.items()
         }
         return httpx.Response(
@@ -107,7 +107,7 @@ def test_replay_rejects_tampered_response(project, tmp_path, monkeypatch):
                 if name == "disposition"
                 else "none"
                 if name == "support"
-                else "none_useful",
+                else next(iter(question["criteria"])),
             )
             for name, question in body["questions"].items()
         }
@@ -290,7 +290,7 @@ def test_binary_change_cannot_be_reported_compliant(project, tmp_path, monkeypat
                 if name == "disposition"
                 else "none"
                 if name == "support"
-                else "none_useful",
+                else next(iter(question["criteria"])),
             )
             for name, question in body["questions"].items()
         }
@@ -324,7 +324,7 @@ def test_reconciliation_conflict_is_visible_not_accepted(
             "support": next(iter(state["delivered_evidence"])),
         }
         answers = {
-            name: answer(question, selected.get(name, "none_useful"))
+            name: answer(question, selected.get(name, next(iter(question["criteria"]))))
             for name, question in body["questions"].items()
         }
         return httpx.Response(200, json={"answers": answers})
@@ -421,7 +421,7 @@ def test_gate_mode_blocks_calibrated_violation(project, tmp_path, monkeypatch):
                 if name == "disposition"
                 else evidence_id
                 if name == "support"
-                else "none_useful",
+                else next(iter(question["criteria"])),
             )
             for name, question in body["questions"].items()
         }

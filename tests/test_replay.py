@@ -33,7 +33,7 @@ def successful_pack(project, tmp_path, monkeypatch):
                 if name == "disposition"
                 else "none"
                 if name == "support"
-                else "none_useful",
+                else next(iter(question["criteria"])),
             )
             for name, question in body["questions"].items()
         }
@@ -167,7 +167,9 @@ def test_replay_accepts_saved_round_followed_by_gateway_error(
             ),
         }
         answers = {
-            name: _answer(question, selections.get(name, "none_useful"))
+            name: _answer(
+                question, selections.get(name, next(iter(question["criteria"])))
+            )
             for name, question in body["questions"].items()
         }
         return httpx.Response(200, json={"answers": answers})

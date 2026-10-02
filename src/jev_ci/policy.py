@@ -215,10 +215,7 @@ def validate_policy(data: object, config: Config) -> dict:
         "max_evidence_bytes",
     ):
         positive_int(evidence[key], f"evidence.{key}")
-    if (
-        evidence["max_rounds"] > config.limits["max_rounds"]
-        or evidence["max_evidence_bytes"] > config.limits["max_evidence_bytes"]
-    ):
+    if evidence["max_evidence_bytes"] > config.limits["max_evidence_bytes"]:
         raise ValueError("policy relaxes root evidence limits")
     if evidence["max_requests_per_round"] > 3:
         raise ValueError("at most three requests per round")
@@ -251,7 +248,11 @@ def validate_policy(data: object, config: Config) -> dict:
         "support_min",
     ):
         ratio(confidence[key], f"confidence.{key}", nullable=True)
-        if config.mode == "gate" and confidence[key] is None:
+        if (
+            config.mode == "gate"
+            and key != "request_selection_min"
+            and confidence[key] is None
+        ):
             raise ValueError("gate policy requires calibrated thresholds")
     if config.mode == "gate" and not confidence["calibration_id"]:
         raise ValueError("gate policy requires calibration_id")
