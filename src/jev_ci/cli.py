@@ -9,6 +9,7 @@ from pathlib import Path
 
 from .coordinator import evaluate, validate
 from .errors import JevCIError
+from .html_report import export_html
 from .reporting import render_text
 from .trace import inspect_pack, verify_pack
 
@@ -39,6 +40,14 @@ def parser() -> argparse.ArgumentParser:
     show = commands.add_parser("inspect", help="read a saved Evidence Pack")
     show.add_argument("--pack", type=Path, required=True)
     show.add_argument("--format", choices=("text", "json"), default="text")
+    report = commands.add_parser(
+        "report", help="export an offline HTML review of a saved Evidence Pack"
+    )
+    report.add_argument("--pack", type=Path, required=True)
+    report.add_argument(
+        "--output", type=Path, required=True, help="HTML file outside the sealed pack"
+    )
+    report.add_argument("--format", choices=("text", "json"), default="text")
     replay = commands.add_parser(
         "replay", help="check saved protocol responses and pack integrity"
     )
@@ -68,6 +77,14 @@ def main(argv: list[str] | None = None) -> int:
         elif args.command == "inspect":
             result = inspect_pack(args.pack)
             code = 0
+        elif args.command == "report":
+            export_html(args.pack, args.output)
+            result = {
+                "status": "report_generated",
+                "report": str(args.output),
+                "source_pack": str(args.pack),
+            }
+            code = 0
         else:
             result = verify_pack(args.pack)
             code = 0
@@ -76,6 +93,8 @@ def main(argv: list[str] | None = None) -> int:
         code = 2
     if args.format == "json":
         print(json.dumps(result, ensure_ascii=False, sort_keys=True))
+    elif args.command == "report" and code == 0:
+        print(f"HTML report: {args.output}")
     else:
         print(render_text(result), file=sys.stderr if code == 2 else sys.stdout)
     return code

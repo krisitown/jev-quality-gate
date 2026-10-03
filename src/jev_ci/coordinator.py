@@ -17,6 +17,7 @@ from .diff_chunking import chunk_diff
 from .errors import ConfigError, InferenceError, JevCIError, ProviderError
 from .evaluator import Evaluator
 from .git import compare
+from .html_report import render_html
 from .inference import Gateway
 from .policy import load_policies
 from .providers import RipwireProvider
@@ -74,6 +75,8 @@ def evaluate(
     evaluator: Evaluator | None = None,
 ) -> dict:
     trace = Pack(output)
+    html_chunks = []
+    html_units = []
     summary = {
         "schema_version": "jev.summary/0.1",
         "run_id": trace.run_id,
@@ -115,6 +118,7 @@ def evaluate(
         trace.event("comparison_resolved", change.descriptor())
         trace.blob(change.raw_diff)
         chunks = chunk_diff(change, config.diff)
+        html_chunks = list(chunks.summary["chunks"])
         trace.write("chunks/manifest.json", chunks.summary)
         trace.event(
             "chunks_created",
@@ -309,6 +313,7 @@ def evaluate(
                         errors.append(result["operational_error"])
                         fatal = True
                     results[policy.id].append(result)
+                    html_units.append(result)
                     trace.write(f"evaluations/{result['id']}/result.json", result)
                     budget["reserved"] = max(0, budget["reserved"] - 1)
             for policy in policy_pack.policies:
@@ -384,6 +389,7 @@ def evaluate(
                     errors.append(reconciliation["operational_error"])
                     fatal = True
                 reconciliations[policy.id] = reconciliation
+                html_units.append(reconciliation)
                 trace.write(
                     f"evaluations/{reconciliation['id']}/result.json", reconciliation
                 )
@@ -496,5 +502,8 @@ def evaluate(
         summary["errors"].append(str(exc)[:300])
         trace.event("run_error", {"error": str(exc)[:300]})
     trace.write_text("report.md", render_markdown(summary))
+    trace.write_text(
+        "report.html", render_html(summary, chunks=html_chunks, units=html_units)
+    )
     trace.finish(summary)
     return summary

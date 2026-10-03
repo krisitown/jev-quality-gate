@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.0 — 2026-10-03
+
+Every new Evidence Pack now includes a self-contained HTML findings report for campaign spot checks. Offline exports can also review historical packs without making new model calls.
+
+- Add `report.html` to new packs, covered by their final checksums.
+- Add `jev-ci report --pack ... --output ...` to export saved results outside the sealed pack without changing original artifacts.
+- Show policy and finding navigation, recorded outcome/action, colored unified diffs with old/new line numbers, cited source locations, authored repair guidance, selected scores, supporting evidence, and expandable typed decision rounds.
+- Highlight precise rows only when source anchors identify a matching line and snapshot. File/chunk anchors remain scope markers; continuation chunks do not invent line numbers.
+- Present uncertainty and operational failures explicitly, alongside available call/token/cost metadata. Scores are not labelled as accuracy.
+- Bundle all styling; reports work offline without scripts or external assets. Escape source/model text and disallow active content.
+
+Policy meaning, inference, config/feedback schemas and protocol0.4 remain unchanged. This release is presentation only; HTML inspection does not itself verify finding correctness, archive integrity, or record campaign dismissals.
+
 ## 0.4.0 — 2026-10-03
 
 Coding agents can inspect a consistent finding packet and later record fix/dismiss/unresolved decisions in a campaign harness. Native answer disagreements and context exhaustion no longer unnecessarily abort otherwise usable runs.

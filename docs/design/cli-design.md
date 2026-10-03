@@ -48,3 +48,7 @@ Exit codes: 0 means no configured blocking action; 1 means a configured policy a
 ## Scope of the first implementation
 
 The first implementation provides `validate`, `evaluate`, `inspect`, and protocol `replay` over a sequential coordinator and one Gateway adapter. Exact file/search retrieval and fixture-validated Ripwire callers/callees are present. The container wrapper and further provider capabilities remain future work.
+
+## HTML report export (0.5)
+
+New evaluations write checksummed `report.html` automatically. `jev-ci report --pack <saved-pack> --output <review.html>` creates an offline view using saved summary, chunk manifests and unit results. The output must stay outside the sealed pack to preserve its integrity. `--format json` reports the export path/status; the generated artifact is always HTML. No inference or source retrieval occurs. See [HTML reporting](html-reporting.md).

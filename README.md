@@ -2,7 +2,7 @@
 
 Jev CI evaluates **committed source-branch changes** against a protected target with bounded YAML policies. It resolves both refs to commits, compares the source to their merge base, divides the complete patch into capped chunks, asks [TypeSafe Jev](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe) typed questions through Vercel AI Gateway, and writes an inspectable Evidence Pack. It never builds or executes candidate code.
 
-Version0.4 implements [verdict-first evidence acquisition](docs/design/evaluation-protocol.md), with a live Gateway integration and real-world engineering validation on public Flask, Gin, and Svelte pull requests. See the [validation report](docs/validation/public-prs-2026-09-30.md) for exact commits, policies, outcomes, cost, and limitations. The included policies are **report-only and uncalibrated**; human-labelled accuracy validation and the separate 30-story experiment remain future work.
+Version0.5 implements [verdict-first evidence acquisition](docs/design/evaluation-protocol.md), with a live Gateway integration and real-world engineering validation on public Flask, Gin, and Svelte pull requests. See the [validation report](docs/validation/public-prs-2026-09-30.md) for exact commits, policies, outcomes, cost, and limitations. The included policies are **report-only and uncalibrated**; human-labelled accuracy validation and the separate 30-story experiment remain future work.
 
 ## Install
 
@@ -42,7 +42,7 @@ chmod 600 .env.local
 .venv/bin/jev-ci replay --pack /tmp/jev-pack --mode protocol
 ```
 
-Use a new `--output` path for each run. `--source` defaults to `HEAD`; `--target` defaults to the local `refs/heads/main`. The tool itself never fetches, so ensure both refs exist locally. For reproducible CI runs, pass commit IDs instead of moving branch names. Exit codes are 0 for an allowed result, 1 for a configured block, and 2 for an operational error. `--format json` gives a versioned machine-readable summary. Each pack also contains `report.md` with policy outcomes, stable finding IDs, policy rules, bounded changed diffs and source anchors, uncertainty diagnostics, and reported usage/cost. Feedback text is authored by the policy, and missing evidence remains visible even when the CI action allows the run.
+Use a new `--output` path for each run. `--source` defaults to `HEAD`; `--target` defaults to the local `refs/heads/main`. The tool itself never fetches, so ensure both refs exist locally. For reproducible CI runs, pass commit IDs instead of moving branch names. Exit codes are 0 for an allowed result, 1 for a configured block, and 2 for an operational error. `--format json` gives a versioned machine-readable summary. Each pack also contains a self-contained `report.html` for visual review and `report.md` with policy outcomes, stable finding IDs, policy rules, bounded changed diffs and source anchors, uncertainty diagnostics, and reported usage/cost. Feedback text is authored by the policy, and missing evidence remains visible even when the CI action allows the run.
 
 The [GitHub Actions example](examples/github/jev-ci.yml) checks out the target history, explicitly fetches the pull request head (including a fork's head ref), and checks out protected controls and a pinned tool revision separately. Copy it into your application's `.github/workflows/`, replace `PINNED_TOOL_COMMIT_SHA` with a reviewed commit from this repository, and create an `AI_GATEWAY_API_KEY` repository secret. It uploads the Evidence Pack even when evaluation fails. GitHub does not expose repository secrets to `pull_request` workflows triggered by forks, so those runs need an approved credential strategy before they can call the Gateway. The package's own [CI job](.github/workflows/ci.yml) runs lint, unit tests, and the pinned Ripwire fixture.
 
@@ -99,3 +99,15 @@ The current implementation scope and validation gaps are tracked in [implementat
 ## Finding review by a coding agent
 
 Supply `feedback.json` or `report.md` to the repair agent. Each finding includes its policy, one-sentence rule, stable ID, relevant changed diff, and linked supporting evidence. The [feedback contract](docs/design/finding-feedback.md) describes recording fixes, dismissals with source-grounded reasons, and unresolved findings in a campaign harness. The tool preserves evaluator output; it does not maintain a dismissal database or waive deterministic check failures.
+
+## HTML findings review
+
+Open `report.html` from a new Evidence Pack in a browser. It includes policy/finding navigation, colored diffs with old/new line numbers, selected source anchors, authored feedback, expandable supporting evidence and typed decision rounds, plus uncertainty and reported usage. Precise source rows are highlighted only when a selected anchor maps to that snapshot and line; file/chunk citations are shown as scope markers. No causal line is invented.
+
+To generate an HTML review from an older pack without inference or changing its checksums:
+
+```sh
+jev-ci report --pack /path/to/saved-pack --output /tmp/findings-review.html
+```
+
+The output must be outside the sealed pack. This command uses saved diffs/results only; no repository, Gateway key, web service, JavaScript, or external assets are required. Export is presentation, not an integrity or correctness audit; use `replay` for its documented verification scope. See [HTML reporting](docs/design/html-reporting.md).
