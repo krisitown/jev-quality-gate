@@ -1,6 +1,6 @@
 schema_version: jev.policy/0.2
 id: responsibility-entanglement
-version: 0.1.0-exploratory
+version: 0.2.0-exploratory
 statement: Distinct responsibilities within a component should remain changeable without unnecessary cross-understanding or modification.
 question: Does this change introduce or worsen coupling between distinct responsibilities within a component, such that changing one unnecessarily requires understanding or modifying the other?
 scope:

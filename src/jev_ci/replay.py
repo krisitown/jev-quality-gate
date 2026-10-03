@@ -328,7 +328,10 @@ def verify_pack(path: Path) -> dict:
             if (path / "manifest.json").exists()
             else {}
         )
-        legacy_maximum = manifest.get("protocol_version") != "jev.protocol/0.4"
+        legacy_maximum = manifest.get("protocol_version") not in {
+            "jev.protocol/0.4",
+            "jev.protocol/0.5",
+        }
         count = 0
         for row in records:
             if row["type"] == "model_response":

@@ -1,6 +1,6 @@
 schema_version: jev.policy/0.2
 id: responsibility-boundary-leakage
-version: 0.1.0-exploratory
+version: 0.2.0-exploratory
 statement: A responsibility should not depend on another responsibility's internal procedure or representation without an evidenced need.
 question: Does this change introduce or worsen a component's dependence on another responsibility's internal procedure or representation without a justified need?
 scope:
@@ -48,6 +48,7 @@ interpretation:
     - The bound conventions define responsibility boundaries and apply them in every dependency direction, including between infrastructure components.
     - Infer responsibilities and internal versus contracted behavior from source, tests, interfaces, and stable contracts; explicit architecture documentation is optional.
     - For example, evidence that a service must sequence low-level save-parent, save-children, and flush procedures can show leakage of storage procedure even when those operations are technically public.
+    - A business service that must sequence delete, positional insert, and flush calls to replace a collection may depend on storage procedure; a single provider-owned replace operation may preserve the boundary.
   exceptions:
     - Dependence through a supported stable contract is permitted when evidence shows the changed use stays within the contract and does not make the caller coordinate another responsibility's internal procedure or representation.
     - An adapter, translation layer, or necessary framework wiring may cross a boundary when evidence shows it preserves the boundary rather than exposing internal procedure or representation.
@@ -60,7 +61,7 @@ documents: [conventions]
 aggregation:
   mode: requires_reconciliation
 discovery:
-  search_terms: [internal, private, impl, adapter, repository, serialize]
+  search_terms: [internal, private, impl, adapter, repository, serialize, delete, insert, flush, storage]
 evidence:
   allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES]
   max_rounds: 3

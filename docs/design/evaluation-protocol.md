@@ -1,6 +1,6 @@
 # Adaptive evaluation protocol
 
-Status: controller revision0.4, `jev.protocol/0.4`. Config and policy schemas remain at0.2 for compatibility. Jev answers typed questions; the controller constructs requests, state, feedback and normalized results. [Gateway integration](gateway-integration.md) describes the native transport.
+Status: controller revision0.5, `jev.protocol/0.5`. Config and policy schemas remain at0.2 for compatibility. Jev answers typed questions; the controller constructs requests, state, feedback and normalized results. [Gateway integration](gateway-integration.md) describes the native transport.
 
 ## Unit and questions
 

@@ -4,14 +4,14 @@
   "control_bundle": {
     "id": "exploratory-responsibility-policies",
     "root": ".",
-    "revision": "0.1.0-exploratory"
+    "revision": "0.2.0-exploratory"
   },
   "document_bindings": [
     {
       "authority": "trusted",
       "id": "conventions",
       "path": "conventions.md",
-      "sha256": "d418aca8853890ba9219a1ae09d5832c56d5d8043f793c37154ded5a11e7985d"
+      "sha256": "de2942137b342f06a131bb7391361b735dffe60ac7229355ead6a30c9b40a756"
     }
   ],
   "inference": {

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 — 2026-10-03
+
+Semantic assessments now have a better path from a search hit to source, and reconciliation receives changed-path labels for earlier unit outcomes.
+
+- Offer a bounded full-file request for policy-scoped files found by literal search.
+- Include changed paths in prior-unit summaries and name paths in cross-chunk evidence requests.
+- Clarify that absent or partial search/provider evidence is not proof of compliance, and that prior outcomes are summaries rather than source evidence.
+- Add concrete exploratory examples for storage procedure leakage and equivalent decisions represented in SQL and application code; keep the32-item menu and report-only settings.
+
+The protocol manifest advances to `jev.protocol/0.5`. Replay continues to honor declared choices for protocol0.4 and0.5 packs. The exploratory policies remain uncalibrated.
+
 ## 0.5.0 — 2026-10-03
 
 Every new Evidence Pack now includes a self-contained HTML findings report for campaign spot checks. Offline exports can also review historical packs without making new model calls.

@@ -38,6 +38,7 @@ def candidates(
     provider: RipwireProvider | None,
     *,
     deadline: float | None = None,
+    evidence: dict[str, Any] | None = None,
 ) -> tuple[list[Candidate], dict]:
     proposed: list[tuple[str, dict, str]] = []
 
@@ -54,6 +55,22 @@ def candidates(
             {"path": path, "snapshot": snapshot},
             f"Read committed {snapshot} file containing the change",
         )
+    # A literal search is useful as a locator, but line excerpts alone are
+    # often too little evidence for a semantic policy. Let Jev follow a
+    # policy-scoped match to the exact committed file in a later bounded round.
+    for item_evidence in (evidence or {}).values():
+        if item_evidence.get("type") != "SEARCH_CODE":
+            continue
+        for item in item_evidence.get("items", []):
+            path = item.get("path")
+            if not isinstance(path, str) or not policy.matches(path):
+                continue
+            snapshot = "head"
+            add(
+                "GET_FILE",
+                {"path": path, "snapshot": snapshot},
+                f"Read {snapshot} source file located by literal search: {path}",
+            )
     provider_coverage = None
     if provider:
         symbols, provider_coverage = provider.changed_symbols(tuple(relevant))
@@ -73,7 +90,7 @@ def candidates(
             add(
                 "GET_DIFF_CHUNK",
                 {"chunk_id": chunk.id},
-                "Inspect another applicable change chunk",
+                "Inspect changed path(s): " + ", ".join(chunk.paths),
             )
     for term in policy.data["discovery"]["search_terms"]:
         add(

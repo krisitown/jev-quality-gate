@@ -1,6 +1,6 @@
 # Implementation status
 
-Status: Jev CI 0.5.0, 2026-10-03. The [live validation report](validation/public-prs-2026-09-30.md) records exercised behavior and adverse outcomes. The revision 0.2 research design remains unfrozen.
+Status: Jev CI 0.6.0, 2026-10-03. The [live validation report](validation/public-prs-2026-09-30.md) records exercised behavior and adverse outcomes. The revision 0.2 research design remains unfrozen.
 
 Implemented: strict config/YAML validation; source-branch/merge-base comparison; complete path inventory; bounded diff chunking and reconstruction; sequential policy/chunk/reconciliation scheduling; native Jev choice Gateway integration with one 503 retry; verdict-first top-one evidence acquisition for unresolved assessments; deterministic bounded request menus shared across evidence categories; exact committed file/search/document retrieval; optional pinned Ripwire 0.6.5 caller/callee queries; confidence thresholds; coverage-aware aggregation and CI exit mapping; durable Evidence Packs; escaped terminal and Markdown reports; unit uncertainty diagnostics; inspect; and offline integrity/linkage plus aggregate verification. A GitHub Actions template, tested package workflow, and public-PR reproduction harness are included.
 

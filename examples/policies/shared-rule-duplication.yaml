@@ -1,6 +1,6 @@
 schema_version: jev.policy/0.2
 id: shared-rule-duplication
-version: 0.1.0-exploratory
+version: 0.2.0-exploratory
 statement: Separate implementations of the same business decision should use one authoritative or explicitly coordinated rule unless evidence justifies distinct behavior.
 question: Does this change introduce or worsen separate implementations of the same business decision without a justified need for distinct behavior?
 scope:
@@ -47,6 +47,7 @@ interpretation:
   definitions:
     - The bound conventions define a business rule by its intended decision, applicability, and purpose, even if separate implementations currently diverge.
     - For example, two changed paths deciding whether the same account may perform the same operation can be duplicate implementations even when one now has a different condition.
+    - A shared mapping from a boolean to an enum does not establish that separate SQL and application predicates producing that boolean are one authoritative rule; compare the predicates and the changed behavior.
     - Similar names, syntax, or a literal search match alone do not establish that two paths implement the same decision.
   exceptions:
     - Separate rules are permitted when their contexts require different behavior or a stable contract assigns distinct meanings, with evidence for that distinction.
@@ -60,7 +61,7 @@ documents: [conventions]
 aggregation:
   mode: requires_reconciliation
 discovery:
-  search_terms: [validate, authorize, permission, eligible, policy, decision]
+  search_terms: [validate, authorize, permission, eligible, policy, decision, remaining, availability, hasSeatsLeft]
 evidence:
   allowed_requests: [GET_DIFF_CHUNK, GET_FILE, SEARCH_CODE, GET_DOCUMENT, GET_CALLERS, GET_CALLEES]
   max_rounds: 3
