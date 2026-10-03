@@ -15,6 +15,7 @@ from .aggregation import aggregate, run_status
 from .config import Config, load_config
 from .diff_chunking import chunk_diff
 from .errors import ConfigError, InferenceError, JevCIError, ProviderError
+from .evaluator import Evaluator
 from .git import compare
 from .inference import Gateway
 from .policy import load_policies
@@ -70,6 +71,7 @@ def evaluate(
     env_file: Path | None = None,
     *,
     transport=None,
+    evaluator: Evaluator | None = None,
 ) -> dict:
     trace = Pack(output)
     summary = {
@@ -91,7 +93,7 @@ def evaluate(
                 "schema_version": "jev.pack/0.2",
                 "run_id": trace.run_id,
                 "tool_version": __version__,
-                "protocol_version": "jev.protocol/0.3",
+                "protocol_version": "jev.protocol/0.4",
                 "config_sha256": config.hash,
                 "policy_pack_sha256": policy_pack.manifest["sha256"],
                 "mode": config.mode,
@@ -184,10 +186,25 @@ def evaluate(
                     policy_id=unit["policy_id"],
                     chunk_id=unit["chunk_id"],
                 )
-        key = _credential(config, env_file) if active else ""
+        key = _credential(config, env_file) if active and evaluator is None else ""
         gateway = (
-            Gateway(config.inference, key, transport=transport) if active else None
+            (
+                evaluator
+                if evaluator is not None
+                else Gateway(config.inference, key, transport=transport)
+            )
+            if active
+            else None
         )
+        manifest["evaluator"] = (
+            gateway.identity
+            if gateway
+            else {
+                "adapter": config.inference["adapter"],
+                "model": config.inference["model"],
+            }
+        )
+        trace.write("manifest.json", manifest)
         provider_ctx = (
             RipwireProvider(
                 change, config.data["providers"]["ripwire"], deadline=deadline
@@ -413,7 +430,7 @@ def evaluate(
         if config.mode == "calibration" and status == "blocked":
             status, code = "completed_with_findings", 0
         feedback = {
-            "schema_version": "jev.feedback/0.1",
+            "schema_version": "jev.feedback/0.2",
             "findings": [
                 finding for item in aggregates for finding in item["findings"]
             ],

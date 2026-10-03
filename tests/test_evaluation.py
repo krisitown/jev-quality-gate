@@ -139,7 +139,7 @@ def test_typed_choice_rejects_fabricated_or_malformed_answers():
                 "answers": {
                     "disposition": {
                         "type": "choice",
-                        "choice": "compliant",
+                        "choice": "fabricated",
                         "probabilities": {"compliant": 0.1, "violation": 0.9},
                     }
                 }

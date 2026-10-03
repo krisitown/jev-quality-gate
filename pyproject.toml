@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "jev-ci"
-version = "0.3.0"
+version = "0.4.0"
 description = "Bounded, traceable policy evaluation for Git changes with TypeSafe Jev"
 readme = "README.md"
 requires-python = ">=3.12"

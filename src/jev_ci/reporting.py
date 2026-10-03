@@ -110,11 +110,20 @@ def _policy_lines(policy: dict) -> list[str]:
     for finding in findings:
         message = _safe(finding.get("message", "Violation finding"))
         lines.append(f"    Finding: {message}")
+        if finding.get("finding_id"):
+            lines.append(f"    Finding ID: {_safe(finding['finding_id'])}")
+        if finding.get("policy_statement"):
+            lines.append(f"    Rule: {_safe(finding['policy_statement'])}")
         guidance = finding.get("repair_guidance")
         if guidance:
             lines.append(f"    Feedback: {_safe(guidance)}")
         for anchor in finding.get("source_anchors") or []:
             lines.append(f"    Source: {_anchor(anchor)}")
+        if finding.get("evidence_id"):
+            lines.append(f"    Supporting evidence: {_safe(finding['evidence_id'])}")
+        for diff in finding.get("related_diff") or []:
+            lines.append("    Related changed diff (bounded scope):")
+            lines.extend("      " + _safe(line) for line in diff["content"].split("\n"))
     if policy.get("outcome") == "uncertain":
         if policy.get("reason"):
             lines.append(f"    Reason: {_safe(policy['reason'])}")
@@ -199,12 +208,30 @@ def render_markdown(summary: dict) -> str:
                 lines.append(
                     f"\n- **Finding:** {_markdown(finding.get('message', 'Violation finding'))}"
                 )
+                if finding.get("finding_id"):
+                    lines.append(
+                        f"  - **Finding ID:** {_html_code(finding['finding_id'])}"
+                    )
+                if finding.get("policy_statement"):
+                    lines.append(
+                        f"  - **Rule:** {_markdown(finding['policy_statement'])}"
+                    )
                 if finding.get("repair_guidance"):
                     lines.append(
                         f"  - **Feedback:** {_markdown(finding['repair_guidance'])}"
                     )
                 for anchor in finding.get("source_anchors") or []:
                     lines.append(f"  - **Source:** {_html_code(_anchor(anchor))}")
+                if finding.get("evidence_id"):
+                    lines.append(
+                        f"  - **Supporting evidence:** {_html_code(finding['evidence_id'])}"
+                    )
+                for diff in finding.get("related_diff") or []:
+                    lines.append("\n**Related changed diff (bounded scope):**")
+                    content = "\n".join(
+                        _safe(line) for line in diff["content"].split("\n")
+                    )
+                    lines.append("\n<pre>" + html.escape(content) + "</pre>\n")
             if policy.get("outcome") == "uncertain":
                 details = []
                 if policy.get("reason"):

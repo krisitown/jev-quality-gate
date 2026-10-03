@@ -90,6 +90,12 @@ def test_reports_escape_control_characters_and_markdown_injection():
                         "message": "bad\x07claim [click](javascript:alert(1)) `code`",
                         "repair_guidance": "[open](javascript:alert(1))",
                         "source_anchors": [{"path": hostile_path}],
+                        "finding_id": "finding-example",
+                        "policy_statement": "Compare shared decisions.",
+                        "evidence_id": "source-1",
+                        "related_diff": [
+                            {"content": "+</pre><script>bad</script>\x1b\n+new line"}
+                        ],
                     }
                 ],
             }
@@ -121,3 +127,7 @@ def test_reports_escape_control_characters_and_markdown_injection():
     assert "## Unit diagnostics" in markdown
     assert "\\u202e" in text and "\\u202e" in markdown
     assert r"\\x0d\\x0aforged" in markdown
+    assert "finding-example" in text and "finding-example" in markdown
+    assert "Compare shared decisions." in text
+    assert "&lt;/pre&gt;&lt;script&gt;" in markdown
+    assert "\n+new line</pre>" in markdown

@@ -14,6 +14,10 @@ class InferenceError(JevCIError):
     pass
 
 
+class ContextLimitError(InferenceError):
+    """The evaluator cannot fit this request in its native context budget."""
+
+
 class ProviderError(JevCIError):
     pass
 

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 — 2026-10-03
+
+Coding agents can inspect a consistent finding packet and later record fix/dismiss/unresolved decisions in a campaign harness. Native answer disagreements and context exhaustion no longer unnecessarily abort otherwise usable runs.
+
+- Honor the API's declared choice for disposition, evidence request and support. Keep structural/option/probability validation and configured disposition/support thresholds. Preserve `choice_probability_mismatch`, maximum and selected scores plus event-level mismatch names.
+- Add content-based `finding_id`, one-sentence `policy_statement` and `related_diff` to findings; show these with support references in terminal and Markdown reports. Preserve source localization as bounded evidence, without claiming precise causal lines.
+- Recognize structured native `max_tokens_exceeded` errors, including Gateway-wrapped JSON strings; stop that unit as `context_budget_exceeded`, without retry or run-wide operational failure. Other units may continue. HTTP/authentication/transport and malformed-answer failures remain operational errors.
+- Reduce the current demo/exploratory example input ceilings to60,000 bytes as conservative pilot guidance. Existing configured limits remain explicit; bytes are not exact tokens.
+- Add a small `Evaluator` library interface and injection point with actual adapter/model provenance and encoded-request sizing. Missing probability scores remain null and cannot satisfy a non-null score threshold. No second LLM backend or new CLI backend option is included.
+- Document a campaign-side dismissal contract; no permanent suppression or campaign runner is implemented here.
+
+Migration: config and policy schemas remain0.2. New packs record `jev.protocol/0.4`; feedback is `jev.feedback/0.2` with additive finding fields. Protocol replay preserves the older maximum-choice validator and normalized shape for historical packs. The existing three policy YAMLs and32-candidate menu remain unchanged. The application and campaign are separate later work.
+
 ## 0.3.0 — 2026-10-02
 
 Unresolved policy evaluations now acquire the highest-ranked remaining evidence request until an accepted verdict or a resource/candidate limit. This addresses early exits caused by `need_more_evidence` plus `none_useful` and stops the request menu from automatically vetoing otherwise compliant judgments.

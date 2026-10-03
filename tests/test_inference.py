@@ -51,8 +51,21 @@ def test_native_choice_preserves_a_tie_with_float_serialization_noise():
     assert answer["choice"] == "yes"
     assert answer["selected_probability"] == 0.49999999999999994
     response["answers"]["decision"]["probabilities"] = {"yes": 0.49999, "no": 0.50001}
+    answer = validate_answers(response, QUESTIONS)["decision"]
+    assert answer["choice"] == "yes"
+    assert answer["choice_probability_mismatch"] is True
+    assert answer["maximum_probability"] == 0.50001
     with pytest.raises(InferenceError, match="not a maximum"):
-        validate_answers(response, QUESTIONS)
+        validate_answers(response, QUESTIONS, legacy_maximum=True)
+
+
+def test_declared_choice_is_authoritative_even_for_a_large_score_disagreement():
+    answer = validate_answers(payload("no"), QUESTIONS)["decision"]
+    assert answer["choice"] == "no"
+    assert answer["selected_probability"] == 0
+    assert answer["choice_probability_mismatch"] is True
+    with pytest.raises(InferenceError, match="offered option"):
+        validate_answers(payload("fabricated"), QUESTIONS)
 
 
 def test_gateway_native_decimal_cost_and_routing_are_preserved():

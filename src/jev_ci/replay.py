@@ -30,6 +30,7 @@ def _verify_attempt_outcomes(
         "transport_error",
         "raw_output_incomplete",
         "retry_503",
+        "context_limit",
     }
     for number, statuses in by_number.items():
         if not statuses or statuses[0] != "started" or statuses.count("started") != 1:
@@ -46,6 +47,7 @@ def _verify_attempt_outcomes(
                 "invalid_json",
                 "invalid_answers",
                 "retry_503",
+                "context_limit",
             }
             and statuses.count("received") != 1
         ):
@@ -236,7 +238,11 @@ def _verify_protocol_links(path: Path, records: list[dict], summary: dict) -> No
         # A failed request may follow one or more saved rounds. It is evidenced by the
         # operational error marker and completed gateway attempts, but has no response.
         tail_prompts = [(i, e) for i, e in prompts if i not in used_prompts]
-        if tail_prompts and not result.get("operational_error"):
+        if (
+            tail_prompts
+            and not result.get("operational_error")
+            and result.get("reason") != "context_budget_exceeded"
+        ):
             raise TraceError(f"orphan failed prompt: {unit_id}")
         for prompt_index, _ in tail_prompts:
             next_prompt = min(
@@ -317,6 +323,12 @@ def verify_pack(path: Path) -> dict:
         from .inference import validate_answers
         from .errors import InferenceError
 
+        manifest = (
+            json.loads((path / "manifest.json").read_bytes())
+            if (path / "manifest.json").exists()
+            else {}
+        )
+        legacy_maximum = manifest.get("protocol_version") != "jev.protocol/0.4"
         count = 0
         for row in records:
             if row["type"] == "model_response":
@@ -331,7 +343,9 @@ def verify_pack(path: Path) -> dict:
                     ).read_bytes()
                 )
                 try:
-                    replayed_answers = validate_answers(response, request["questions"])
+                    replayed_answers = validate_answers(
+                        response, request["questions"], legacy_maximum=legacy_maximum
+                    )
                 except InferenceError as exc:
                     raise TraceError(
                         f"replayed typed answers are invalid: {exc}"

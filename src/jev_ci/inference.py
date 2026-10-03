@@ -9,11 +9,13 @@ from decimal import Decimal, InvalidOperation
 
 import httpx
 
-from .errors import InferenceError
+from .errors import ContextLimitError, InferenceError
 from .util import canonical, digest, strict_json
 
 
-def validate_answers(payload: object, questions: dict) -> dict:
+def validate_answers(
+    payload: object, questions: dict, *, legacy_maximum: bool = False
+) -> dict:
     if (
         not isinstance(payload, dict)
         or not isinstance(payload.get("answers"), dict)
@@ -40,15 +42,11 @@ def validate_answers(payload: object, questions: dict) -> dict:
         if abs(sum(probs.values()) - 1) > 0.020000001:
             raise InferenceError(f"{name}: probabilities do not sum to one")
         choice = answer.get("choice")
-        if (
-            not isinstance(choice, str)
-            or choice not in probs
-            # Native JSON probabilities can serialize a tie one floating-point
-            # rounding step apart. Preserve the provider's choice and raw scores.
-            or not math.isclose(
-                probs[choice], max(probs.values()), rel_tol=0, abs_tol=1e-12
-            )
-        ):
+        if not isinstance(choice, str) or choice not in probs:
+            raise InferenceError(f"{name}: selected choice is not an offered option")
+        maximum = max(probs.values())
+        mismatch = not math.isclose(probs[choice], maximum, rel_tol=0, abs_tol=1e-12)
+        if legacy_maximum and mismatch:
             raise InferenceError(f"{name}: selected choice is not a maximum")
         confidence = answer.get("confidence")
         if confidence is not None and (
@@ -64,6 +62,9 @@ def validate_answers(payload: object, questions: dict) -> dict:
             "probabilities": probs,
             "native_confidence": confidence,
         }
+        if not legacy_maximum:
+            normalized[name]["choice_probability_mismatch"] = mismatch
+            normalized[name]["maximum_probability"] = float(maximum)
     returned = payload.get("model")
     if returned is not None and returned != "typesafe-ai/jev":
         raise InferenceError("Gateway returned a different model identity")
@@ -136,6 +137,21 @@ class Gateway:
         self.settings = settings
         self._key = key
         self._transport = transport
+
+    @property
+    def identity(self) -> dict:
+        return {"adapter": "vercel-typesafe", "model": self.settings["model"]}
+
+    def request_bytes(self, state: dict, questions: dict) -> int:
+        return len(
+            canonical(
+                {
+                    "model": self.settings["model"],
+                    "state": state,
+                    "questions": questions,
+                }
+            )
+        )
 
     def evaluate(
         self, state: dict, questions: dict, deadline: float, on_attempt
@@ -256,6 +272,14 @@ class Gateway:
                     "credential_redacted": response_redacted,
                 }
             )
+            if status != 200:
+                try:
+                    error_payload = strict_json(safe_raw)
+                except (ValueError, UnicodeError):
+                    error_payload = None
+                if _context_limit(error_payload):
+                    on_attempt({**event, "status": "context_limit"})
+                    raise ContextLimitError("Evaluator native context limit exceeded")
             if status == 503 and attempt == 0:
                 on_attempt({**event, "status": "retry_503"})
                 if deadline - time.monotonic() <= 0.5:
@@ -287,7 +311,30 @@ class Gateway:
                     "cost": safe["cost"],
                     "cost_usd": safe["cost_usd"],
                     "model": safe["model"],
+                    "choice_probability_mismatches": [
+                        name
+                        for name, answer in answers.items()
+                        if answer["choice_probability_mismatch"]
+                    ],
                 }
             )
             return answers, {"raw_response": payload, "telemetry": safe}
         raise InferenceError("Gateway 503 retry exhausted")
+
+
+def _context_limit(payload: object) -> bool:
+    if isinstance(payload, dict):
+        return any(
+            (key in {"type", "code", "error_type"} and value == "max_tokens_exceeded")
+            or _context_limit(value)
+            for key, value in payload.items()
+        )
+    if isinstance(payload, list):
+        return any(_context_limit(value) for value in payload)
+    # Some Gateway errors carry the provider JSON as a nested string.
+    if isinstance(payload, str) and payload.lstrip().startswith("{"):
+        try:
+            return _context_limit(strict_json(payload.encode()))
+        except (ValueError, UnicodeError):
+            pass
+    return False

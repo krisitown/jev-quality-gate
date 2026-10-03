@@ -9,9 +9,10 @@ from typing import Any
 from .config import Config
 from .context import candidates, retrieve
 from .diff_chunking import ChunkManifest, DiffChunk
-from .errors import ComparisonError, InferenceError, ProviderError
+from .errors import ComparisonError, ContextLimitError, InferenceError, ProviderError
+from .evaluator import Evaluator, meets_threshold
+from .findings import finding_context
 from .git import Comparison
-from .inference import Gateway
 from .policy import Policy
 from .providers import RipwireProvider
 from .util import canonical, digest
@@ -111,7 +112,7 @@ def run_unit(
     manifest: ChunkManifest,
     config: Config,
     provider: RipwireProvider | None,
-    gateway: Gateway,
+    gateway: Evaluator,
     trace,
     budget: dict,
     prior: list[dict] | None = None,
@@ -245,11 +246,11 @@ def run_unit(
             "round": round_number,
         }
         ask = questions(menu, delivered, kind)
-        request = {"model": config.inference["model"], "state": state, "questions": ask}
+        request = {"model": gateway.identity["model"], "state": state, "questions": ask}
         if time.monotonic() >= budget["deadline"]:
             result["reason"] = "run_deadline"
             break
-        request_bytes = len(canonical(request))
+        request_bytes = gateway.request_bytes(state, ask)
         if request_bytes > min(
             config.inference["max_request_bytes"],
             config.limits["max_input_bytes"],
@@ -277,7 +278,7 @@ def run_unit(
             {
                 "round": round_number,
                 "request_blob": request_ref,
-                "request_bytes": len(canonical(request)),
+                "request_bytes": request_bytes,
             },
             unit_id,
             policy.id,
@@ -338,9 +339,13 @@ def run_unit(
             answer, response = gateway.evaluate(state, ask, budget["deadline"], attempt)
         except InferenceError as exc:
             result["reason"] = (
-                "run_call_budget" if "budget" in str(exc) else "inference_error"
+                "context_budget_exceeded"
+                if isinstance(exc, ContextLimitError)
+                else "run_call_budget"
+                if "budget" in str(exc)
+                else "inference_error"
             )
-            if result["reason"] != "run_call_budget":
+            if result["reason"] not in {"run_call_budget", "context_budget_exceeded"}:
                 result["operational_error"] = str(exc)[:200]
             trace.event(
                 "inference_error",
@@ -400,9 +405,8 @@ def run_unit(
         selected_candidate = next(
             (c for c in menu if next_choice and c.id == next_choice["choice"]), None
         )
-        if choice == "compliant" and (
-            threshold["compliant_min"] is None
-            or selected["selected_probability"] >= threshold["compliant_min"]
+        if choice == "compliant" and meets_threshold(
+            selected, threshold["compliant_min"]
         ):
             if chunk and any(
                 policy.matches(path)
@@ -413,19 +417,15 @@ def run_unit(
             else:
                 result.update(outcome="compliant", reason=None)
             break
-        if choice == "violation" and (
-            threshold["violation_min"] is None
-            or selected["selected_probability"] >= threshold["violation_min"]
+        if choice == "violation" and meets_threshold(
+            selected, threshold["violation_min"]
         ):
             support = answer["support"]
             evidence_id = support["choice"]
             if (
                 evidence_id != "none"
                 and evidence_id in delivered
-                and (
-                    threshold["support_min"] is None
-                    or support["selected_probability"] >= threshold["support_min"]
-                )
+                and meets_threshold(support, threshold["support_min"])
             ):
                 anchors, localization = _anchors(delivered[evidence_id])
                 if anchors:
@@ -433,6 +433,9 @@ def run_unit(
                         outcome="violation",
                         reason=None,
                         finding={
+                            **finding_context(
+                                policy, config, chunk, delivered, delivered[evidence_id]
+                            ),
                             "policy_id": policy.id,
                             "policy_version": policy.data["version"],
                             "unit_id": unit_id,

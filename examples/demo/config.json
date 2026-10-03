@@ -41,7 +41,7 @@
     "max_candidates": 12,
     "max_evidence_bytes": 80000,
     "max_search_results": 20,
-    "max_input_bytes": 100000
+    "max_input_bytes": 60000
   },
   "ci": {"incomplete": "report", "operational_error": "error"},
   "policy_dir": "policies"
